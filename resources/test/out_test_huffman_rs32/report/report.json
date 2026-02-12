@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "input_root": "/home/yahya/Desktop/peptide-encoding-evaluation/resources/test/data_test",
+    "output_root": "/home/yahya/Desktop/peptide-encoding-evaluation/resources/test/out_test_huffman_rs32",
+    "report_dir": "/home/yahya/Desktop/peptide-encoding-evaluation/resources/test/out_test_huffman_rs32/report",
+    "generated_at_utc": "2026-02-02T10:09:42Z"
+  },
+  "summary": {
+    "total_files": 3,
+    "decoded_present": 3,
+    "success_count": 1,
+    "success_rate": 0.3333333333333333,
+    "total_original_bytes": 3148,
+    "total_decoded_bytes": 3140,
+    "avg_bit_error_rate": 0.22059448978953625,
+    "median_bit_error_rate": 0.29754901960784313
+  },
+  "files": [
+    {
+      "input_path": "text_files/Chinesisches Gedicht.txt",
+      "status": "ok",
+      "original_size_bytes": 765,
+      "decoded_size_bytes": 763,
+      "size_delta_bytes": -2,
+      "success": false,
+      "byte_errors": 484,
+      "bit_errors": 1821,
+      "bit_error_rate": 0.29754901960784313
+    },
+    {
+      "input_path": "text_files/Lied des Narren.txt",
+      "status": "ok",
+      "original_size_bytes": 627,
+      "decoded_size_bytes": 621,
+      "size_delta_bytes": -6,
+      "success": false,
+      "byte_errors": 595,
+      "bit_errors": 1827,
+      "bit_error_rate": 0.3642344497607656
+    },
+    {
+      "input_path": "text_files/pep.txt",
+      "status": "ok",
+      "original_size_bytes": 1756,
+      "decoded_size_bytes": 1756,
+      "size_delta_bytes": 0,
+      "success": true,
+      "byte_errors": 0,
+      "bit_errors": 0,
+      "bit_error_rate": 0.0
+    }
+  ]
+}

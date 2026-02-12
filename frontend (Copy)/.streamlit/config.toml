@@ -1,0 +1,13 @@
+[theme]
+primaryColor = "#2d5f3f"           # Forest green
+backgroundColor = "#f5f9f7"        # Light mint background
+secondaryBackgroundColor = "#e8f3ed"  # Sage green
+textColor = "#1a3b2a"              # Dark green text
+font = "sans serif"
+
+[server]
+headless = true
+port = 8501
+
+[browser]
+gatherUsageStats = false

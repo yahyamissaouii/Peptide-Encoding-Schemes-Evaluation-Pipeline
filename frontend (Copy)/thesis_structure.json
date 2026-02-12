@@ -1,0 +1,773 @@
+{
+  "title": "Encoding Schemes for Peptide Mass Storage",
+  "chapters": [
+    {
+      "id": "introduction",
+      "title": "Introduction",
+      "start_page": 1,
+      "end_page": 4,
+      "content": "...",
+      "sections": [
+        {
+          "id": "motivation_and_problem_context",
+          "title": "Motivation and Problem Context",
+          "content": "In recent years, there has been a rapid growth in the amount of digital data \cite{Reinsel2018} generated across scientific, industrial and societal fields. Historically, hardware scaling trends enabled sustained improvements in hardware performance and density; however, as data generation continues to grow exponentially, these improvements are becoming less sufficient to resolve the increasing mismatch between data growth and hardware evolution. As a consequence, storing large amounts of digital data over a long period of time is becoming increasingly challenging. Traditional data storage technologies and methods are widely used and well established; however, they suffer from multiple limitations, particularly with respect to storage density, durability, and energy efficiency \cite{Doricchi2022}. These aspects are fundamentally interdependent: pushing density tends to reduce physical noise margins, which requires additional redundancy and maintenance to preserve reliability, thereby increasing energy and operational overhead. Notably, the limited operational lifespan of these media leads to frequent data transfers and migration, resulting in additional costs, increased system complexity, and higher risks of data loss during transfer and maintenance operations.
+
+In this context, the limitations of electronic and magnetic storage media have motivated research into alternative data storage technologies. Consequently research has increasingly focused on fundamentally different storage paradigms
+that aim to overcome the physical and operational constraints of conventional media."
+        },
+        {
+          "id": "peptides_as_a_medium_for_molecular_data_storage",
+          "title": "Peptides as a Medium for Molecular Data Storage",
+          "content": "Molecular data storage emerged as a promising approach to address long term data preservation challenges, while DNA based systems receiving the most attention to date.
+
+Molecular storage media allow information to be stored without requiring a continuous energy supply, enabling data to remain preserved even in the absence of active hardware \cite{Jo2024}. Among molecular storage approaches, DNA based systems have received the most attention, as DNA sequences reliably encode biological information and can remain stable for long periods under suitable storage conditions \cite{Dong2020, Imburgia2025}. In addition, DNA based storage benefits from decades of progress in synthesis and sequencing technologies, which provide a relatively mature and well understood technological basis \cite{Buko2023,Wang2024} . A further key advantage of molecular storage lies in its exceptionally high storage density, which can exceed that of electronic and magnetic storage media by several orders of magnitude \cite{Jo2024,Imburgia2025} .
+
+DNA based storage have demonstrated that digital information can be encoded, stored, and retrieved using molecular substrates in a reliable way, even under experimental conditions that require the use of error correction and redundancy mechanisms. As a result, DNA based storage has become the reference point for molecular data storage research.
+
+
+
+However, DNA is not the only biological polymer capable of representing digital information. Alternatively, peptides, which consist of sequences of amino acids, represent one such molecular storage medium \cite{Ng2021}. In contrast to DNA, peptides can incorporate a substantially larger set of chemically distinct monomers because their synthesis and sequencing do not rely on enzyme recognition processes \cite{Ng2021}. This larger effective symbol alphabet can increase flexibility in data encoding. From an information theoretic perspective, a larger alphabet can increase the amount of information encoded per symbol; however, the achievable gains depend critically on how encoding schemes interact with substrate specific noise and readout uncertainty. In addition, peptide synthesis and analysis are supported by established techniques originating from proteomics research, where high throughput workflows are already widely employed \cite{Ng2021}. In particular, mass spectrometry based readout introduces measurement characteristics that differ fundamentally from DNA sequencing, as information is inferred from mass to charge distributions rather than discrete base identification.
+
+In contrast to DNA storage, encoding strategies for peptide based systems remain comparatively underexplored, which limits the understanding of how existing molecular encoding principles perform when applied to peptide substrates \cite{Ng2021}.
+Addressing these gaps is essential for understanding the potential and limitations of peptide based data storage."
+        },
+        {
+          "id": "research_question_and_scope",
+          "title": "Research Question and Scope",
+          "content": "This thesis aims to examine whether encoding approaches developed for molecular data storage can be transferred to peptide sequences, in other words, whether the underlying design principles remain applicable when the molecular substrate and sequence alphabet change.
+
+Can coding schemes originally developed for DNA based data storage, such as Huffman coding, DNA Fountain, and Yin-Yang coding, be applied to peptide sequences without requiring fundamental changes? In this thesis, “fundamental changes” refers to redesigning the core logic of a scheme; only minimal adaptations are considered, such as adjusting the alphabet mapping, parameter settings, and constraint handling to match peptide sequence properties.
+
+This work focuses on computational evaluation and does not include experimental wet-lab validation. The goal is to provide a structured assessment of the transferability and limitations of DNA based coding schemes when applied to peptide sequences, using implementation based experiments and quantitative metrics (e.g., encoding overhead and decoding reliability under modeled errors) to identify where direct transfer is feasible and where peptide specific modifications become necessary.
+To contextualize our research question, the following section summarizes existing work on molecular data storage and encoding schemes relevant to this thesis."
+        }
+      ]
+    },
+    {
+      "id": "related_work",
+      "title": "Related Work",
+      "start_page": 5,
+      "end_page": 10,
+      "content": "...",
+      "sections": [
+        {
+          "id": "molecular_data_storage_as_an_alternative_paradigm",
+          "title": "Molecular Data Storage as an Alternative Paradigm",
+          "content": "..."
+        },
+        {
+          "id": "dna_as_a_medium_for_molecular_data_storage",
+          "title": "DNA as a Medium for Molecular Data Storage",
+          "content": "..."
+        },
+        {
+          "id": "encoding_and_error_correction_in_molecular_storage_systems",
+          "title": "Encoding and Error Correction in Molecular Storage Systems",
+          "content": "...",
+          "subsections": [
+            {
+              "id": "error_sources_during_writing_and_readout",
+              "title": "Error sources during writing and readout",
+              "content": "..."
+            },
+            {
+              "id": "redundancy_across_strands_reed_solomon_and_interleaving",
+              "title": "Redundancy across strands: Reed-Solomon and interleaving",
+              "content": "..."
+            },
+            {
+              "id": "handling_strand_loss_fountain_style_schemes",
+              "title": "Handling strand loss: fountain-style schemes",
+              "content": "..."
+            },
+            {
+              "id": "constraint_aware_mapping_the_yin_yang_codec",
+              "title": "Constraint-aware mapping: the Yin-Yang codec",
+              "content": "..."
+            }
+          ]
+        },
+        {
+          "id": "storage_using_peptide_sequences_in_the_literature",
+          "title": "Storage using peptide sequences in the literature",
+          "content": "..."
+        },
+        {
+          "id": "summary_of_prior_work_and_research_gap",
+          "title": "Summary of Prior Work and Research Gap",
+          "content": "..."
+        }
+      ]
+    },
+    {
+      "id": "methodology",
+      "title": "Methodology",
+      "start_page": 11,
+      "end_page": 34,
+      "content": "...",
+      "sections": [
+        {
+          "id": "study_design_scope_and_notation",
+          "title": "Study Design, Scope, and Notation",
+          "content": "\\label{sec:method_study_design}
+This thesis investigates whether encoding strategies developed for DNA-based molecular data storage can be transferred to peptide-based storage. To enable a controlled comparison, a software evaluation pipeline is implemented that (i) encodes digital files into fixed-length peptide sequences over a restricted amino-acid alphabet, (ii) applies an amino-acid-level channel model, and (iii) decodes the perturbed sequences to assess end-to-end reconstruction reliability. The pipeline is modular, enabling different encoding schemes to be evaluated within the same framework. \\begin{figure}[H]\\centering  \\scalebox{0.75}{\\input{Sources/pipline}} \\caption{Overview of the evaluation pipeline.} \\label{fig:method_pipeline_overview} \\end{figure}",
+          "subsections": [
+            {
+              "id": "experimental_design_and_assumptions",
+              "title": "Experimental design and assumptions",
+              "content": "\\label{sec:method_objective_scope} The objective is to evaluate, in a peptide setting, encoding schemes that are widely used in DNA storage and to quantify their robustness under residue-level perturbations. Three scheme families are considered: a Huffman-based baseline, a Fountain-code-based scheme, and a Yin--Yang-style constrained scheme. Each scheme produces a peptide sequence representation of the input; decoding performance is then quantified using the metrics defined in this chapter. The evaluation is conducted in software and focuses on coding and decoding behavior under a defined stochastic channel model.
+
+\\paragraph{Varied factors.} 
+\\begin{itemize} 
+\\item \\textbf{Encoding scheme:} Multiple encoding schemes are compared under a shared pipeline backbone. 
+
+
+\\item \\textbf{Outer redundancy configuration:} 
+Redundancy is varied as an experimental factor, but its realization is scheme-dependent. 
+For RS-protected configurations (e.g., Yin--Yang with an outer Reed--Solomon layer), redundancy is parameterized by the number of parity peptides $r$ added per block (e.g., $r \\in \\{8,16,32,64,128\\}$). 
+For fountain-based configurations, redundancy is parameterized by an overhead factor $\\rho$, i.e., transmitting $(1+\\rho)$ encoded droplets relative to the $k_{\\mathrm{F}}$ source symbols. 
+For each scheme, the corresponding redundancy parameter (either $r$ or $\\rho$) is swept while all remaining pipeline components and channel parameters are kept fixed, to quantify the redundancy--reliability trade-off under identical channel conditions.
+
+
+\\item \\textbf{Input size:} Files spanning a wide size range (from bytes up to megabytes) are used to expose size-dependent failure behavior. 
+\\end{itemize}
+
+
+\\paragraph{Controlled factors.}
+\\label{sec:method_factors}
+The following factors are kept fixed across all experiments unless stated otherwise:
+\\begin{itemize}
+  \\item \\textbf{Peptide alphabet and mapping interface:} A restricted peptide alphabet $\\Sigma$ with $|\\Sigma|=8$ is used
+  throughout, corresponding to $\\log_2|\\Sigma|=3$ bits of symbol capacity per residue.
+
+  \\item \\textbf{Peptide length and framing:} Peptides have a fixed length $L$ (default $L=18$). An optional index prefix
+  may be enabled, which reduces payload capacity accordingly.
+
+  \\item \\textbf{Evaluation criteria:} The same end-to-end success criterion and the same evaluation metrics are applied
+  to all schemes.
+\\end{itemize}
+
+\\paragraph{Channel settings (evaluation scenarios).}
+Two fixed channel parameterizations are evaluated:
+\\begin{itemize}
+  \\item \\textbf{Uniform (sequence-agnostic) channel:} a stress-test setting with sequence-independent error behavior.
+  \\item \\textbf{Score-driven (sequence-aware) channel:} a setting in which per-peptide error rates depend on predicted
+  sequence quality (Section~\\ref{sec:method_error_model}).
+\\end{itemize}
+All cross-scheme comparisons are interpreted \\emph{within} the same channel setting. The uniform setting is used to
+establish a conservative reference point, while the score-driven setting is used for the main comparisons.
+
+
+\\paragraph{Success criterion.}
+\\label{sec:method_success_criterion}
+A run is considered successful if the reconstructed byte sequence matches the original input exactly. Let
+$\\mathbf{x}$ denote the original byte sequence and $\\hat{\\mathbf{x}}$ the decoded output. Success is defined as:
+\\[
+\\mathrm{success} = \\mathbf{1}\\!\\left[\\hat{\\mathbf{x}}=\\mathbf{x}\\right].
+\\]
+No additional checksum layer is used in the RS-protected pipelines; therefore correctness is evaluated solely by
+end-to-end equality of bytes. The Fountain configuration includes a per-droplet cyclic redundancy check (CRC) that
+is used only to discard corrupted droplets (treating them as erasures); end-to-end correctness is still evaluated
+by byte equality.
+
+\\paragraph{Evaluation assumptions.}
+\\label{sec:method_assumptions}
+The evaluation makes simplifying assumptions that follow from the implemented pipeline:
+\\begin{itemize}
+  \\item \\textbf{Metadata is available to the decoder.} Parameters required for decoding (e.g., block structure,
+  padding information, and optional indexing settings) are assumed to be known during decoding. The current pipeline
+  does not embed this metadata into peptide payloads.
+
+  \\item \\textbf{One observation per peptide.} Each peptide is evaluated as a single observed sequence after corruption.
+  The pipeline does not simulate multiple reads, confidence scores, or consensus calling.
+
+  \\item \\textbf{Stochastic channel without fixed seeding by default.} Error application is randomized; no fixed seeding
+  strategy is used unless explicitly enabled for debugging or replication.
+\\end{itemize}
+
+
+"
+            },
+            {
+              "id": "notation",
+              "title": "Notation",
+              "content": "..."
+            }
+          ]
+        },
+        {
+          "id": "input_data_and_experimental_setup",
+          "title": "Input Data and Experimental Setup",
+          "content": "...",
+          "subsections": [
+            {
+              "id": "input_corpus",
+              "title": "Input corpus",
+              "content": "..."
+            },
+            {
+              "id": "experimental_setup_and_run_definition",
+              "title": "Experimental Setup and Run Definition",
+              "content": "..."
+            }
+          ]
+        },
+        {
+          "id": "encoding_pipeline",
+          "title": "Encoding Pipeline",
+          "content": "...",
+          "subsections": [
+            {
+              "id": "source_coding_huffman_baseline",
+              "title": "Source coding (Huffman baseline)",
+              "content": "..."
+            },
+            {
+              "id": "yin_yang_style_constrained_mapping",
+              "title": "Yin-Yang-style constrained mapping",
+              "content": "..."
+            },
+            {
+              "id": "bitstream_to_peptides_packing_padding_indexing_rs_interface",
+              "title": "Bitstream to peptides (packing, padding, indexing, RS interface)",
+              "content": "..."
+            }
+          ]
+        },
+        {
+          "id": "outer_redundancy_and_error_protection",
+          "title": "Outer Redundancy and Error Protection",
+          "content": "...",
+          "subsections": [
+            {
+              "id": "reed_solomon_outer_code",
+              "title": "Reed-Solomon outer code",
+              "content": "..."
+            },
+            {
+              "id": "systematic_lt_fountain_coding",
+              "title": "Systematic LT fountain coding",
+              "content": "..."
+            }
+          ]
+        },
+        {
+          "id": "residue_level_channel_and_error_model",
+          "title": "Residue-Level Channel and Error Model",
+          "content": "...",
+          "subsections": [
+            {
+              "id": "channel_definition_operators_and_parameterization",
+              "title": "Channel definition, operators, and parameterization",
+              "content": "..."
+            }
+          ]
+        },
+        {
+          "id": "decoding_and_erasure_handling",
+          "title": "Decoding and Erasure Handling",
+          "content": "...",
+          "subsections": [
+            {
+              "id": "peptide_normalization_placement_and_erasure_rules",
+              "title": "Peptide normalization, placement, and erasure rules",
+              "content": "..."
+            },
+            {
+              "id": "outer_redundancy_decoding",
+              "title": "Outer redundancy decoding",
+              "content": "..."
+            },
+            {
+              "id": "fountain_decoding_crc_filtering_and_lt_peeling",
+              "title": "Fountain decoding: CRC filtering and LT peeling",
+              "content": "..."
+            },
+            {
+              "id": "payload_reconstruction_and_inverse_source_coding",
+              "title": "Payload reconstruction and inverse source coding",
+              "content": "..."
+            }
+          ]
+        },
+        {
+          "id": "evaluation_protocol_and_metrics",
+          "title": "Evaluation Protocol and Metrics",
+          "content": "...",
+          "subsections": [
+            {
+              "id": "comparison_criterion",
+              "title": "Comparison criterion",
+              "content": "..."
+            },
+            {
+              "id": "evaluation_metrics",
+              "title": "Evaluation metrics",
+              "content": "..."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "results",
+      "title": "Results",
+      "start_page": 35,
+      "end_page": 42,
+      "content": "...",
+      "sections": [
+        {
+          "id": "huffman_baseline",
+          "title": "Huffman baseline",
+          "content": "...",
+          "subsections": [
+            {
+              "id": "worst_case_uniform_sweep_upper_bound_parity_requirement",
+              "title": "Worst-case uniform sweep: upper-bound parity requirement",
+              "content": "..."
+            },
+            {
+              "id": "score_driven_channel_reduced_parity_suffices",
+              "title": "Score-driven channel: reduced parity suffices",
+              "content": "..."
+            }
+          ]
+        },
+        {
+          "id": "yin_yang_constrained_mapping",
+          "title": "Yin-Yang constrained mapping",
+          "content": "..."
+        },
+        {
+          "id": "huffman_vs_yin_yang_at_matched_rs_budgets",
+          "title": "Huffman vs. Yin-Yang at matched RS budgets",
+          "content": "..."
+        },
+        {
+          "id": "fountain_coding",
+          "title": "Fountain coding",
+          "content": "..."
+        }
+      ]
+    },
+    {
+      "id": "discussion",
+      "title": "Discussion",
+      "start_page": 43,
+      "end_page": 46,
+      "content": "...",
+      "sections": [
+        {
+          "id": "interpretation_of_results_and_answer_to_the_research_question",
+          "title": "Interpretation of results and answer to the research question",
+          "content": "..."
+        },
+        {
+          "id": "limitations_and_practical_implications",
+          "title": "Limitations and practical implications",
+          "content": "..."
+        }
+      ]
+    },
+    {
+      "id": "conclusion_and_outlook",
+      "title": "Conclusion and Outlook",
+      "start_page": 47,
+      "end_page": 50,
+      "content": "...",
+      "sections": [
+        {
+          "id": "conclusion",
+          "title": "Conclusion",
+          "content": "..."
+        },
+        {
+          "id": "outlook",
+          "title": "Outlook",
+          "content": "..."
+        }
+      ]
+    },
+    {
+      "id": "bibliography",
+      "title": "Bibliography",
+      "start_page": 51,
+      "end_page": null,
+      "content": "% Encoding: UTF-8
+
+
+@Misc{Reinsel2018,
+  author    = {David Reinsel and John Gantz and John Rydning},
+  title     = {The Digitization of the World: From Edge to Core.},
+  howpublished = {White Paper},
+  year      = {2018},
+  note      = {International Data Corporation (IDC), Sponsored by Seagate},
+  url       = {https://www.seagate.com/files/www-content/our-story/trends/files/idc-seagate-dataage-whitepaper.pdf}
+}
+
+@article{Doricchi2022,
+author = {Doricchi, Andrea and Platnich, Casey M. and Gimpel, Andreas and Horn, Friederikee and Earle, Max and Lanzavecchia, German and Cortajarena, Aitziber L. and Liz-Marzán, Luis M. and Liu, Na and Heckel, Reinhard and Grass, Robert N. and Krahne, Roman and Keyser, Ulrich F. and Garoli, Denis},
+title = {Emerging Approaches to DNA Data Storage: Challenges and Prospects.},
+journal = {ACS Nano},
+volume = {16},
+number = {11},
+pages = {17552-17571},
+year = {2022},
+doi = {10.1021/acsnano.2c06748},
+    note ={PMID: 36256971},
+
+URL = { 
+    
+        https://doi.org/10.1021/acsnano.2c06748
+    
+    
+
+},
+eprint = { 
+    
+        https://doi.org/10.1021/acsnano.2c06748
+    
+    
+
+}
+
+}
+
+@article{Grass2015,
+  author  = {Grass, Robert N. and Heckel, Reinhard and Puddu, Michele and Paunescu, Dragos and Stark, Wendelin J.},
+  title   = {Robust chemical preservation of digital information on {DNA} in silica with error-correcting codes},
+  journal = {Angewandte Chemie International Edition},
+  year    = {2015},
+  volume  = {54},
+  number  = {8},
+  pages   = {2552--2555},
+  doi     = {10.1002/anie.201411378},
+  note    = {PMID: 25650567},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/25650567/},
+  eprint  = {https://doi.org/10.1002/anie.201411378}
+}
+
+@article{Buko2023,
+  author  = {Buko, Tomasz and Tuczko, Nella and Ishikawa, Takao},
+  title   = {{DNA} Data Storage},
+  journal = {BioTech},
+  year    = {2023},
+  volume  = {12},
+  number  = {2},
+  pages   = {44},
+  doi     = {10.3390/biotech12020044},
+  note    = {PMID: 37366792; PMCID: PMC10296570},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/37366792/},
+  eprint  = {https://doi.org/10.3390/biotech12020044}
+}
+@article{Wang2024,
+  author  = {Wang, Shaopeng and Mao, Xiuhai and Wang, Fei and Zuo, Xiaolei and Fan, Chunhai},
+  title   = {Data Storage Using {DNA}},
+  journal = {Advanced Materials},
+  year    = {2024},
+  volume  = {36},
+  number  = {6},
+  pages   = {e2307499},
+  doi     = {10.1002/adma.202307499},
+  note    = {PMID: 37800877},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/37800877/},
+  eprint  = {https://doi.org/10.1002/adma.202307499}
+}
+
+
+@article{Imburgia2025,
+  author  = {Imburgia, Carina and Organick, Lee and Zhang, Karen and Cardozo, Nicolas and McBride, Jeff and Bee, Callista and Wilde, Delaney and Roote, Gwendolin and Jorgensen, Sophia and Ward, David and Anderson, Charlie and Strauss, Karin and Ceze, Luis and Nivala, Jeff},
+  title   = {Random access and semantic search in {DNA} data storage enabled by {Cas9} and machine-guided design},
+  journal = {Nature Communications},
+  year    = {2025},
+  volume  = {16},
+  number  = {1},
+  pages   = {6388},
+  doi     = {10.1038/s41467-025-61264-5},
+  note    = {PMID: 40640156; PMCID: PMC12246221},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/40640156/},
+  eprint  = {https://doi.org/10.1038/s41467-025-61264-5}
+}
+
+
+@article{Dong2020,
+  author  = {Dong, Yiming and Sun, Fajia and Ping, Zhi and Ouyang, Qi and Qian, Long},
+  title   = {{DNA} storage: research landscape and future prospects},
+  journal = {National Science Review},
+  year    = {2020},
+  volume  = {7},
+  number  = {6},
+  pages   = {1092--1107},
+  doi     = {10.1093/nsr/nwaa007},
+  note    = {PMID: 34692128; PMCID: PMC8288837},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/34692128/},
+  eprint  = {https://doi.org/10.1093/nsr/nwaa007}
+}
+
+
+@article{Jo2024,
+  author  = {Jo, Seokwoo and Shin, Haewon and Joe, Sung-Yune and Baek, David and Park, Chaewon and Chun, Honggu},
+  title   = {Recent progress in {DNA} data storage based on high-throughput {DNA} synthesis},
+  journal = {Biomedical Engineering Letters},
+  year    = {2024},
+  volume  = {14},
+  number  = {5},
+  pages   = {993--1009},
+  doi     = {10.1007/s13534-024-00386-z},
+  note    = {PMID: 39220021; PMCID: PMC11362454},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/39220021/},
+  eprint  = {https://doi.org/10.1007/s13534-024-00386-z}
+}
+
+
+
+@Misc{Ng2021,
+  author       = {Cheuk Chi A. Ng and Wai Man Tam and Haidi Yin and Qian Wu and Pui-Kin So and Melody Yee-Man Wong and Francis C. M. Lau and Zhong-Ping Yao},
+  title        = {Data storage using peptide sequences.},
+  howpublished = {Journal Article},
+  year         = {2021},
+  note         = {Nature Communications, 12:4242},
+  url          = {https://doi.org/10.1038/s41467-021-24496-9}
+}
+
+
+
+
+
+
+
+@Misc{Akash2024,
+  author       = {Aman Akash and Elena Bencurova and Thomas Dandekar},
+  title        = {How to make DNA data storage more applicable.},
+  howpublished = {Review Article},
+  year         = {2024},
+  note         = {Trends in Biotechnology, Volume 42, Issue 1},
+  url          = {https://doi.org/10.1016/j.tibtech.2023.07.006}
+}
+@Misc{Wang2022,
+  author       = {Chenyang Wang and Guannan Ma and Di Wei and Xinru Zhang and Peihan Wang and Cuidan Li and Jing Xing and Zheng Wei and Bo Duan and Dongxin Yang and Pei Wang and Dongbo Bu and Fei Chen},
+  title        = {Mainstream encoding–decoding methods of DNA data storage},
+  howpublished = {Review Article},
+  year         = {2022},
+  note         = {CCF Transactions on High Performance Computing, Volume 4, Pages 23--33},
+  url          = {https://doi.org/10.1007/s42514-022-00094-z}
+}
+@article{Press2020,
+  author  = {Press, William H. and Hawkins, John A. and Jones, Stephen K. Jr and Schaub, Jeffrey M. and Finkelstein, Ilya J.},
+  title   = {{HEDGES} error-correcting code for {DNA} storage corrects indels and allows sequence constraints},
+  journal = {Proceedings of the National Academy of Sciences of the United States of America},
+  year    = {2020},
+  volume  = {117},
+  number  = {31},
+  pages   = {18489--18496},
+  doi     = {10.1073/pnas.2004821117},
+  note    = {PMID: 32675237; PMCID: PMC7414044},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/32675237/},
+  eprint  = {https://doi.org/10.1073/pnas.2004821117}
+}
+
+@Misc{Zhu2023,
+  author       = {Chenyang Zhu and Zixin Xiao and Zihan Li and Yajun Zhao and Yue Zhang and Qi Liu and Chang Liu and Xuegong Zhang and Bo Yang and Hao Yin},
+  title        = {Towards practical and robust DNA-based data archiving using the yin–yang codec system},
+  howpublished = {Research Article},
+  year         = {2023},
+  note         = {Nature Communications, Volume 14, Article number: 470},
+  url          = {https://pmc.ncbi.nlm.nih.gov/articles/PMC10766522/}
+}
+@article{Yazdi2015,
+  author  = {Tabatabaei Yazdi, S. M. Hossein and Yuan, Yongbo and Ma, Jian and Zhao, Huimin and Milenkovic, Olgica},
+  title   = {A Rewritable, Random-Access {DNA}-Based Storage System},
+  journal = {Scientific Reports},
+  year    = {2015},
+  volume  = {5},
+  pages   = {14138},
+  doi     = {10.1038/srep14138},
+  url     = {https://www.nature.com/articles/srep14138},
+  note    = {Received 05 May 2015; Accepted 17 August 2015; Published 18 September 2015}
+}
+
+
+@article{Organick2018,
+  author  = {Organick, Lee and Ang, Siena Dumas and Chen, Yuan-Jyue and Lopez, Randolph and Yekhanin, Sergey and Makarychev, Konstantin and Racz, Miklos Z. and Kamath, Govinda and Gopalan, Parikshit and Nguyen, Bichlien and Takahashi, Christopher N. and Newman, Sharon and Parker, Hsing-Yeh and Rashtchian, Cyrus and Stewart, Kendall and Gupta, Gagan and Carlson, Robert and Mulligan, John and Carmean, Douglas and Seelig, Georg and Ceze, Luis and Strauss, Karin},
+  title   = {Random access in large-scale {DNA} data storage},
+  journal = {Nature Biotechnology},
+  year    = {2018},
+  volume  = {36},
+  number  = {3},
+  pages   = {242--248},
+  doi     = {10.1038/nbt.4079},
+  note    = {PMID: 29457795},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/29457795/},
+  eprint  = {https://doi.org/10.1038/nbt.4079}
+}
+
+
+@article{Xu2021,
+  author  = {Xu, Chengtao and Zhao, Chao and Ma, Biao and Liu, Hong},
+  title   = {Uncertainties in synthetic {DNA}-based data storage},
+  journal = {Nucleic Acids Research},
+  year    = {2021},
+  volume  = {49},
+  number  = {10},
+  pages   = {5451--5469},
+  doi     = {10.1093/nar/gkab230},
+  note    = {PMID: 33836076; PMCID: PMC8191772},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/33836076/},
+  eprint  = {https://doi.org/10.1093/nar/gkab230}
+}
+
+@article{Yeom2023,
+  author  = {Yeom, Huiran and Kim, Namphil and Lee, Amos Chungwon and Kim, Jinhyun and Kim, Hamin and Choi, Hansol and Song, Seo Woo and Kwon, Sunghoon and Choi, Yeongjae},
+  title   = {Highly Accurate Sequence- and Position-Independent Error Profiling of {DNA} Synthesis and Sequencing},
+  journal = {ACS Synthetic Biology},
+  year    = {2023},
+  volume  = {12},
+  number  = {12},
+  pages   = {3567--3577},
+  doi     = {10.1021/acssynbio.3c00308},
+  note    = {PMID: 37961855; PMCID: PMC10729760},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/37961855/},
+  eprint  = {https://doi.org/10.1021/acssynbio.3c00308}
+}
+
+@article{Erlich2017,
+  author  = {Erlich, Yaniv and Zielinski, Dina},
+  title   = {{DNA} {Fountain} enables a robust and efficient storage architecture},
+  journal = {Science},
+  year    = {2017},
+  volume  = {355},
+  number  = {6328},
+  pages   = {950--954},
+  doi     = {10.1126/science.aaj2038},
+  note    = {PMID: 28254941},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/28254941/},
+  eprint  = {https://doi.org/10.1126/science.aaj2038}
+}
+
+@article{Ping2022,
+  author  = {Ping, Zhi and Chen, Shihong and Zhou, Guangyu and Huang, Xiaoluo and Zhu, Sha Joe and Zhang, Haoling and Lee, Henry H and Lan, Zhaojun and Cui, Jie and Chen, Tai and Zhang, Wenwei and Yang, Huanming and Xu, Xun and Church, George M and Shen, Yue},
+  title   = {Towards practical and robust {DNA}-based data archiving using the yin--yang codec system},
+  journal = {Nature Computational Science},
+  year    = {2022},
+  volume  = {2},
+  number  = {4},
+  pages   = {234--242},
+  doi     = {10.1038/s43588-022-00231-2},
+  note    = {PMID: 38177542; PMCID: PMC10766522},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/38177542/},
+  eprint  = {https://doi.org/10.1038/s43588-022-00231-2}
+}
+
+@article{IsidroLlobet2019,
+  author  = {Isidro-Llobet, Albert and Kenworthy, Martin N. and Mukherjee, Subha and Kopach, Michael E. and Wegner, Katarzyna and Gallou, Fabrice and Smith, Austin G. and Roschangar, Frank},
+  title   = {Sustainability Challenges in Peptide Synthesis and Purification: From {R\&D} to Production},
+  journal = {The Journal of Organic Chemistry},
+  year    = {2019},
+  volume  = {84},
+  number  = {8},
+  pages   = {4615--4628},
+  doi     = {10.1021/acs.joc.8b03001},
+  note    = {PMID: 30900880},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/30900880/},
+  eprint  = {https://doi.org/10.1021/acs.joc.8b03001}
+}
+
+@article{Gutman2022,
+  author  = {Gutman, A. N. and others},
+  title   = {Predicting the Success of {Fmoc}-Based Peptide Synthesis},
+  journal = {ACS Omega},
+  year    = {2022},
+  volume  = {7},
+  number  = {29},
+  pages   = {25805--25814},
+  doi     = {10.1021/acsomega.2c02057},
+  note    = {PMID: 35847273; PMCID: PMC9280948},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/35847273/},
+  eprint  = {https://doi.org/10.1021/acsomega.2c02057}
+}
+
+@article{Muth2018,
+  author  = {Muth, Thilo and Renard, Bernhard Y.},
+  title   = {Evaluating de novo sequencing in proteomics: already an accurate alternative to database-driven peptide identification?},
+  journal = {Briefings in Bioinformatics},
+  year    = {2018},
+  volume  = {19},
+  number  = {5},
+  pages   = {954--970},
+  doi     = {10.1093/bib/bbx033},
+  URL     = {https://doi.org/10.1093/bib/bbx033},
+  eprint  = {https://doi.org/10.1093/bib/bbx033}
+}
+
+@article{Poston2014,
+  author  = {Poston, Chloe N. and Higgs, Richard E. and You, Jinsam and Gelfanova, Valentina and Hale, John E. and Knierman, Michael D. and Siegel, Robert and Gutierrez, Jesus A.},
+  title   = {A quantitative tool to distinguish isobaric leucine and isoleucine residues for mass spectrometry-based de novo monoclonal antibody sequencing},
+  journal = {Journal of the American Society for Mass Spectrometry},
+  year    = {2014},
+  volume  = {25},
+  number  = {7},
+  pages   = {1228--1236},
+  doi     = {10.1007/s13361-014-0892-1},
+  note    = {PMID: 24845350},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/24845350/},
+  eprint  = {https://doi.org/10.1007/s13361-014-0892-1}
+}
+
+@article{Xiao2016,
+  author  = {Xiao, Yongsheng and Vecchi, Malgorzata M. and Wen, Dingyi},
+  title   = {Distinguishing between Leucine and Isoleucine by Integrated {LC}-{MS} Analysis Using an Orbitrap Fusion Mass Spectrometer},
+  journal = {Analytical Chemistry},
+  year    = {2016},
+  volume  = {88},
+  number  = {21},
+  pages   = {10757--10766},
+  doi     = {10.1021/acs.analchem.6b03409},
+  note    = {PMID: 27704771},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/27704771/},
+  eprint  = {https://doi.org/10.1021/acs.analchem.6b03409}
+}
+
+@article{Rossler2023,
+  author  = {Rössler, Simon L. and Grob, Nathalie M. and Buchwald, Stephen L. and Pentelute, Bradley L.},
+  title   = {Abiotic peptides as carriers of information for the encoding of small-molecule library synthesis},
+  journal = {Science},
+  year    = {2023},
+  volume  = {379},
+  number  = {6635},
+  pages   = {939--945},
+  doi     = {10.1126/science.adf1354},
+  note    = {PMID: 36862767; PMCID: PMC10064805},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/36862767/},
+  eprint  = {https://doi.org/10.1126/science.adf1354}
+}
+
+@article{Luo2025,
+  author  = {Luo, Benxiang and Gao, Songyan and Wu, Minghao and Dong, Xin and Deng, Xiaoyong and Hu, Honggang},
+  title   = {Peptide-encapsulated hydrogels for long-term data preservation},
+  journal = {Communications Materials},
+  year    = {2025},
+  volume  = {6},
+  pages   = {183},
+  doi     = {10.1038/s43246-025-00915-y},
+  URL     = {https://doi.org/10.1038/s43246-025-00915-y},
+  eprint  = {https://doi.org/10.1038/s43246-025-00915-y}
+}
+
+@article{Zhang2025,
+  author  = {Zhang, Anxun and Wang, Longjie and Zhai, Xiaowei and Xiao, Yao and Wu, Yanchan and Zhao, Yongxi and Liu, Kai and Zheng, Ji-Shen and Chen, Dong},
+  title   = {Composite Mapping for Peptide-Based Data Storage with Higher Coding Density and Fewer Synthesis Cycles},
+  journal = {Advanced Science},
+  year    = {2025},
+  volume  = {12},
+  number  = {27},
+  pages   = {e2503790},
+  doi     = {10.1002/advs.202503790},
+  note    = {PMID: 40285644; PMCID: PMC12279161},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/40285644/},
+  eprint  = {https://doi.org/10.1002/advs.202503790}
+}
+"
+    }
+  ]
+}

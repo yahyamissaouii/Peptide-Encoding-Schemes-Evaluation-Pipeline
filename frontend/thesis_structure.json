@@ -1,0 +1,2210 @@
+{
+  "title": "Encoding Schemes for Peptide Mass Storage",
+  "chapters": [
+    {
+      "id": "introduction",
+      "title": "Introduction",
+      "start_page": 1,
+      "end_page": 4,
+      "landingpg_content": "In recent years, there has been a rapid growth in the amount of digital data \cite{Reinsel2018} generated across scientific, industrial and societal fields. Historically, hardware scaling trends enabled sustained improvements in hardware performance and density; however ...",
+      "content": "...",
+      "sections": [
+        {
+          "id": "motivation_and_problem_context",
+          "title": "Motivation and Problem Context",
+          "content": "In recent years, there has been a rapid growth in the amount of digital data \cite{Reinsel2018} generated across scientific, industrial and societal fields. Historically, hardware scaling trends enabled sustained improvements in hardware performance and density; however, as data generation continues to grow exponentially, these improvements are becoming less sufficient to resolve the increasing mismatch between data growth and hardware evolution. As a consequence, storing large amounts of digital data over a long period of time is becoming increasingly challenging. Traditional data storage technologies and methods are widely used and well established; however, they suffer from multiple limitations, particularly with respect to storage density, durability, and energy efficiency \cite{Doricchi2022}. These aspects are fundamentally interdependent: pushing density tends to reduce physical noise margins, which requires additional redundancy and maintenance to preserve reliability, thereby increasing energy and operational overhead. Notably, the limited operational lifespan of these media leads to frequent data transfers and migration, resulting in additional costs, increased system complexity, and higher risks of data loss during transfer and maintenance operations.
+
+In this context, the limitations of electronic and magnetic storage media have motivated research into alternative data storage technologies. Consequently research has increasingly focused on fundamentally different storage paradigms
+that aim to overcome the physical and operational constraints of conventional media."
+        },
+        {
+          "id": "peptides_as_a_medium_for_molecular_data_storage",
+          "title": "Peptides as a Medium for Molecular Data Storage",
+          "content": "Molecular data storage emerged as a promising approach to address long term data preservation challenges, while DNA based systems receiving the most attention to date.
+
+Molecular storage media allow information to be stored without requiring a continuous energy supply, enabling data to remain preserved even in the absence of active hardware \cite{Jo2024}. Among molecular storage approaches, DNA based systems have received the most attention, as DNA sequences reliably encode biological information and can remain stable for long periods under suitable storage conditions \cite{Dong2020, Imburgia2025}. In addition, DNA based storage benefits from decades of progress in synthesis and sequencing technologies, which provide a relatively mature and well understood technological basis \cite{Buko2023,Wang2024} . A further key advantage of molecular storage lies in its exceptionally high storage density, which can exceed that of electronic and magnetic storage media by several orders of magnitude \cite{Jo2024,Imburgia2025} .
+
+DNA based storage have demonstrated that digital information can be encoded, stored, and retrieved using molecular substrates in a reliable way, even under experimental conditions that require the use of error correction and redundancy mechanisms. As a result, DNA based storage has become the reference point for molecular data storage research.
+
+
+
+However, DNA is not the only biological polymer capable of representing digital information. Alternatively, peptides, which consist of sequences of amino acids, represent one such molecular storage medium \cite{Ng2021}. In contrast to DNA, peptides can incorporate a substantially larger set of chemically distinct monomers because their synthesis and sequencing do not rely on enzyme recognition processes \cite{Ng2021}. This larger effective symbol alphabet can increase flexibility in data encoding. From an information theoretic perspective, a larger alphabet can increase the amount of information encoded per symbol; however, the achievable gains depend critically on how encoding schemes interact with substrate specific noise and readout uncertainty. In addition, peptide synthesis and analysis are supported by established techniques originating from proteomics research, where high throughput workflows are already widely employed \cite{Ng2021}. In particular, mass spectrometry based readout introduces measurement characteristics that differ fundamentally from DNA sequencing, as information is inferred from mass to charge distributions rather than discrete base identification.
+
+In contrast to DNA storage, encoding strategies for peptide based systems remain comparatively underexplored, which limits the understanding of how existing molecular encoding principles perform when applied to peptide substrates \cite{Ng2021}.
+Addressing these gaps is essential for understanding the potential and limitations of peptide based data storage."
+        },
+        {
+          "id": "research_question_and_scope",
+          "title": "Research Question and Scope",
+          "content": "This thesis aims to examine whether encoding approaches developed for molecular data storage can be transferred to peptide sequences, in other words, whether the underlying design principles remain applicable when the molecular substrate and sequence alphabet change.
+
+Can coding schemes originally developed for DNA based data storage, such as Huffman coding, DNA Fountain, and Yin-Yang coding, be applied to peptide sequences without requiring fundamental changes? In this thesis, “fundamental changes” refers to redesigning the core logic of a scheme; only minimal adaptations are considered, such as adjusting the alphabet mapping, parameter settings, and constraint handling to match peptide sequence properties.
+
+This work focuses on computational evaluation and does not include experimental wet-lab validation. The goal is to provide a structured assessment of the transferability and limitations of DNA based coding schemes when applied to peptide sequences, using implementation based experiments and quantitative metrics (e.g., encoding overhead and decoding reliability under modeled errors) to identify where direct transfer is feasible and where peptide specific modifications become necessary.
+To contextualize our research question, the following section summarizes existing work on molecular data storage and encoding schemes relevant to this thesis."
+        }
+      ]
+    },
+    {
+      "id": "related_work",
+      "title": "Related Work",
+      "start_page": 5,
+      "end_page": 10,
+      "landingpg_content": "Molecular data storage approaches the same problem from a different direction \cite{Doricchi2022} . Instead of storing bits in electronic states or magnetic domains, it represents information as sequences of chemical building blocks ...",
+      "content": "...",
+      "sections": [
+        {
+          "id": "molecular_data_storage_as_an_alternative_paradigm",
+          "title": "Molecular Data Storage as an Alternative Paradigm",
+          "content": "Molecular data storage approaches the same problem from a different direction \\cite{Doricchi2022} . Instead of storing bits in electronic states or magnetic domains, it represents information as sequences of chemical building blocks. Data is written through synthesis, and later recovered through analytical readout. The important point is what happens in between: once the molecules exist, keeping the information does not require continuous power or active device operation \\cite{Doricchi2022,Jo2024}. Data longevity becomes primarily a property of chemical stability and storage conditions rather than a property of running hardware.
+
+Prior work frequently highlights the high theoretical storage density and long-term stability of molecular substrates \\cite{Jo2024,Wang2024}. Together, these properties make molecular systems attractive for archival scenarios in which durability is prioritized over access speed.
+
+Given these motivations, research has focused on two linked questions: which molecular carriers are practical, and which encoding strategies allow reliable recovery in the presence of synthesis and readout imperfections. Biological polymers have drawn particular interest here. They offer regular, sequence-defined structures and can be analyzed with mature laboratory techniques developed in neighboring fields. This combination has made biological sequences a natural starting point for molecular storage research. This focus has shaped much of the existing research on molecular data storage.
+"
+        },
+        {
+          "id": "dna_as_a_medium_for_molecular_data_storage",
+          "title": "DNA as a Medium for Molecular Data Storage",
+          "content": "In much of the literature, storage using DNA sequences is implemented by distributing data across many short strands rather than relying on a single long molecule. Each strand typically contains a payload region and additional structure that supports reconstruction, such as an index or addressing information used to identify the strand within a pool \\cite{Organick2018}. This strand set perspective is central to system design, since reliable recovery depends not only on symbol-level accuracy but also on whether the relevant strands remain available after synthesis, storage, and sequencing.
+
+Representative systems follow this pooled-oligonucleotide model while differing in how they enable reconstruction and selective retrieval. For example, large-scale demonstrations use explicit indexing and primer-based selection to support random access to individual files within a mixed pool \\cite{Organick2018}. Earlier work also explored architectures that support rewriting and targeted access by combining constrained addressing with editing operations \\cite{Yazdi2015}. These designs highlight that the DNA medium is typically accessed through operations on pools and subsets, not through sequential reads of a single continuous sequence.
+
+From an encoding perspective, DNA storage must be designed for a noisy write--store--read pipeline, in which both within-strand corruption and strand-level availability effects can occur. The specific error sources and their implications for coding are discussed in Section~\\ref{subsec:error-sources}; these assumptions motivate layered redundancy and the use of error-correction schemes tailored to molecular channels \\cite{Doricchi2022,Jo2024,Press2020}.
+
+Taken together, these assumptions and constraints shape many coding approaches developed in the DNA storage literature. This is directly relevant for the present thesis: when transferring encoding schemes to peptide sequences, the alphabet, dominant constraints, and readout mechanism change, and it becomes necessary to identify which design elements remain applicable and which implicitly rely on DNA-specific conditions.
+"
+        },
+        {
+          "id": "encoding_and_error_correction_in_molecular_storage_systems",
+          "title": "Encoding and Error Correction in Molecular Storage Systems",
+          "content": "...",
+          "subsections": [
+            {
+              "id": "error_sources_during_writing_and_readout",
+              "title": "Error sources during writing and readout",
+              "content": "\\label{subsec:error-sources}
+Encoding strategies in molecular storage are strongly shaped by the fact that both writing and readout are imperfect. During chemical synthesis, errors can be introduced directly into the produced sequences. Reported synthesis issues include substitutions, insertions, and deletions, as well as reduced yield that can lead to missing sequences in the final pool \\cite{Xu2021,Yeom2023}. Readout introduces additional distortion. For storage using DNA sequences, the dominant error types depend on the sequencing technology, but commonly discussed effects include substitutions, insertions and deletions, and uneven coverage, where some strands are under-sampled or not observed at all \\cite{Dong2020,Yazdi2015}. The resulting channel therefore combines two levels of uncertainty: corruption within a strand and the loss of entire strands from the pool \\cite{Doricchi2022}.
+
+Because these effects appear repeatedly across experimental demonstrations, prior work typically relies on layered protection rather than a single mechanism. Compression can reduce the number of molecules that must be synthesized, but it also increases sensitivity to corruption if the compressed bitstream loses synchronization. Error correction is therefore usually applied across many strands, and it is often combined with design rules that avoid sequence patterns known to interact poorly with synthesis and sequencing.
+"
+            },
+            {
+              "id": "redundancy_across_strands_reed_solomon_and_interleaving",
+              "title": "Redundancy across strands: Reed-Solomon and interleaving",
+              "content": "A common approach in the literature is to add redundancy across a block of strands using classical block codes. Reed--Solomon codes are frequently used as an outer code because they operate on symbols over finite fields and can correct a bounded number of symbol errors or erasures within a block \\cite{Grass2015,Organick2018}. This is well matched to pooled DNA storage, where strand dropout behaves like an erasure and where remaining strands may still contain within-strand corruption.
+
+Interleaving can be used together with outer coding to spread localized failures across multiple codewords. If certain strands are more errorprone due to synthesis variability or sampling effects, interleaving reduces the chance that a single block is dominated by those failures. Work on indel-resilient decoding further emphasizes that insertions and deletions can be particularly damaging because they disrupt symbol alignment, which motivates careful layering of redundancy and reconstruction procedures \\cite{Press2020}.
+"
+            },
+            {
+              "id": "handling_strand_loss_fountain_style_schemes",
+              "title": "Handling strand loss: fountain-style schemes",
+              "content": "Strand loss and uneven sampling are central concerns in large pools, and they motivate erasure-tolerant constructions. Fountain codes produce a stream of encoded packets such that the original data can be recovered once a sufficient number of packets is collected. DNA Fountain adapts this idea to storage using DNA sequences by combining a fountain construction with indexing and screening rules that reject sequences predicted to be difficult to synthesize or sequence \\cite{Erlich2017}. In this view, dropout is treated as a first-class design constraint: instead of assuming all strands will be present, the coding strategy is designed to remain decodable when only a subset is recovered.
+"
+            },
+            {
+              "id": "constraint_aware_mapping_the_yin_yang_codec",
+              "title": "Constraint-aware mapping: the Yin-Yang codec",
+              "content": "In addition to redundancy, prior work often uses transcoding rules that shape the generated sequences themselves. Many approaches aim to avoid patterns associated with higher error rates, such as long homopolymers or extreme GC content (the fraction of guanine and cytosine bases in a strand). The Yin--Yang codec is a representative example that encodes bits into nucleotides while enforcing compatibility with practical synthesis and sequencing constraints through paired encoding rules \\cite{Ping2022}. This illustrates a broader design principle: reducing the effective noise of the physical channel can be achieved not only by adding redundancy, but also by generating sequences that are less likely to trigger synthesis and readout problems.
+
+The encoding approaches reviewed above were largely developed around nucleotide alphabets and sequencing pipelines. When transferring these ideas to peptide sequences, both the alphabet and the readout mechanism change, and synthesis can introduce its own characteristic by-products such as truncations and deletions \\cite{IsidroLlobet2019}. The following section therefore reviews prior work on storage using peptide sequences and discusses which error and constraint assumptions differ most from the DNA setting.
+"
+            }
+          ]
+        },
+        {
+          "id": "storage_using_peptide_sequences_in_the_literature",
+          "title": "Storage using peptide sequences in the literature",
+          "content": "Work on storage using peptide sequences is still much smaller than the DNA literature, but it establishes a concrete end-to-end workflow: map digital symbols to amino acids, synthesize the resulting peptides, and recover the data by sequencing the peptides with liquid chromatography coupled to tandem mass spectrometry (LC--MS/MS) \\cite{Ng2021}. In this setting, the central engineering problem is not only how to encode bits efficiently, but how to choose sequences that remain synthesizable and readable with high fidelity.
+
+
+Ng et al.\\ demonstrated the feasibility of peptide-based digital storage and provided a reference design for handling mixed peptide pools \\cite{Ng2021}. They split the payload into short peptides and add an address component so that peptides can be reordered during decoding \\cite{Ng2021}. A key practical point in their study is that data-bearing peptides require near-complete sequence recovery, unlike typical proteomics workflows where peptides can often be identified even at low coverage by searching against sequence databases \\cite{Ng2021}. To support reliable recovery, Ng et al.\\ combined careful sequence design with explicit error protection (reporting error correction that tolerates missing or incorrect residues) and developed custom software tailored to their peptide design \\cite{Ng2021}.
+
+
+
+
+
+
+Peptide synthesis introduces its own failure modes, and these are sequence dependent. Solid phase peptide synthesis involves many repeated coupling and deprotection steps, and some sequences accumulate side products or incomplete sequences more readily than others, which reduces the fraction of correct full-length product \\cite{IsidroLlobet2019}. In the data storage demonstration by Ng et al., this reality already influenced design choices: they restricted the amino acid set and avoided or limited residues that made synthesis or detection less reliable for their protocol \\cite{Ng2021}. More recently, Gutman et al.\\ proposed PepSySco, a model that predicts the likelihood that a given sequence can be successfully produced with Fmoc solid phase peptide synthesis \\cite{Gutman2022}. For peptide storage, this type of predictor can play a similar role to sequence screening in DNA storage: it provides a practical constraint signal that can be used to reject candidates likely to yield poor synthesis outcomes.
+
+
+Readout by tandem mass spectrometry does not observe a sequence directly. Instead, the sequence must be inferred from fragmentation patterns, and accuracy depends on spectrum quality, fragmentation completeness, and the algorithm used for reconstruction \\cite{Muth2018}. Certain ambiguities are also fundamental. A well-known example is that leucine and isoleucine are isobaric and cannot be distinguished by mass alone in standard workflows, which motivates either additional experimental strategies or alphabet choices that avoid such ambiguity when high-fidelity decoding is required \\cite{Poston2014,Xiao2016}. These constraints push peptide storage designs toward carefully chosen symbol alphabets and decoding pipelines rather than relying on generic proteomics tooling.
+
+
+Beyond direct digital storage demonstrations, peptide sequences are also used as information carriers in peptide encoded library systems, where decoding relies on MS/MS and where the choice of a non-isobaric encoding alphabet and explicit tag design rules are emphasized to improve sequence recovery \\cite{Rossler2023}. Recent work has also begun to address practical aspects such as preservation of peptide material for long-term retention and alternative mapping strategies that increase effective coding density under synthesis constraints \\cite{Luo2025,Zhang2025}. Taken together, the peptide literature suggests three recurring design pressures: sequence-dependent synthesis reliability, readout ambiguity and algorithmic uncertainty in MS/MS reconstruction, and the need for explicit addressing and error protection when data are distributed across many short peptides \\cite{Ng2021,Gutman2022,Muth2018}.
+"
+        },
+        {
+          "id": "summary_of_prior_work_and_research_gap",
+          "title": "Summary of Prior Work and Research Gap",
+          "content": "Molecular data storage is commonly framed as an archival alternative to conventional electronic media, motivated by the high theoretical density and long-term stability of molecular substrates \\cite{Doricchi2022,Jo2024,Wang2024}. Most DNA-based systems operationalize this idea by spreading information across large pools of short strands. These strands typically carry an explicit address or index, which supports reconstruction from a mixed pool and enables selective access to subsets of the data \\cite{Organick2018,Yazdi2015}. At the same time, the write--store--read pipeline combines two distinct uncertainties: symbol errors within strands and strand-level effects such as uneven sampling or complete dropout. As a result, DNA storage designs rarely rely on a single protective mechanism; instead, they layer redundancy across strands, erasure tolerance, and constraint-aware mapping to mitigate synthesis and sequencing failures \\cite{Grass2015,Erlich2017,Ping2022,Press2020}.
+
+The peptide literature is smaller, but it points to a different set of practical constraints. On the writing side, synthesis feasibility is strongly sequence dependent \\cite{IsidroLlobet2019,Gutman2022}. On the reading side, LC--MS/MS does not directly output a sequence; reconstruction is inferred from fragmentation spectra and inherits intrinsic ambiguities, including isobaric residues \\cite{Muth2018,Poston2014,Xiao2016}. Recent contributions extend this line of work toward more practical deployment, for example by improving preservation and by proposing mapping strategies that increase effective coding density under synthesis constraints \\cite{Luo2025,Zhang2025}.
+
+Even with these advances, it is still unclear how far DNA-oriented encoding schemes can be transferred to peptide-based pipelines. Many constructions in the DNA storage literature are designed and evaluated under assumptions tied to the nucleotide alphabet, typical biochemical constraints, and sequencing-specific error patterns \\cite{Doricchi2022,Dong2020}. Switching to peptides changes both the symbol set and the readout mechanism, which reshapes the dominant error models and constraints during decoding \\cite{Ng2021,Muth2018}. In practice, reliability is achieved through a stack of components rather than an isolated code: source coding (compression), framing and addressing, constrained mapping, and outer error correction. For peptide storage, the coupling between these layers becomes especially important because synchronization loss and MS/MS reconstruction ambiguity can affect large portions of the decoded bitstream, and because feasibility depends tightly on the chosen alphabet and mapping strategy.
+
+This thesis addresses the research gap by systematically evaluating encoding-scheme components under a peptide-oriented pipeline. The aim is to determine which design elements from DNA storage remain effective when translated to peptide sequences, which rely on DNA-specific conditions, and where adaptation is required to accommodate peptide synthesis constraints and LC--MS/MS readout characteristics.
+"
+        }
+      ]
+    },
+    {
+      "id": "methodology",
+      "title": "Methodology",
+      "start_page": 11,
+      "end_page": 34,
+      "landingpg_content": "This thesis investigates whether encoding strategies developed for DNA-based molecular data
+storage can be transferred to peptide-based storage. To enable a controlled comparison, a soft-
+ware evaluation pipeline is ...",
+      "content": "...",
+      "sections": [
+        {
+          "id": "study_design_scope_and_notation",
+          "title": "Study Design, Scope, and Notation",
+          "content": "\\label{sec:method_study_design}
+This thesis investigates whether encoding strategies developed for DNA-based molecular data storage can be transferred to peptide-based storage. To enable a controlled comparison, a software evaluation pipeline is implemented that (i) encodes digital files into fixed-length peptide sequences over a restricted amino-acid alphabet, (ii) applies an amino-acid-level channel model, and (iii) decodes the perturbed sequences to assess end-to-end reconstruction reliability. The pipeline is modular, enabling different encoding schemes to be evaluated within the same framework. \\label{fig:method_pipeline_overview} \\begin{figure}[H]\\centering \\includegraphics[width=1\\textwidth]{pipeline.png} \\caption{Pipeline Overview}  \\end{figure}",
+          "subsections": [
+            {
+              "id": "experimental_design_and_assumptions",
+              "title": "Experimental design and assumptions",
+              "content": "\\label{sec:method_objective_scope} The objective is to evaluate, in a peptide setting, encoding schemes that are widely used in DNA storage and to quantify their robustness under residue-level perturbations. Three scheme families are considered: a Huffman-based baseline, a Fountain-code-based scheme, and a Yin--Yang-style constrained scheme. Each scheme produces a peptide sequence representation of the input; decoding performance is then quantified using the metrics defined in this chapter. The evaluation is conducted in software and focuses on coding and decoding behavior under a defined stochastic channel model.
+
+\\paragraph{Varied factors.} 
+
+\\item \\textbf{Encoding scheme:} Multiple encoding schemes are compared under a shared pipeline backbone. 
+
+
+\\item \\textbf{Outer redundancy configuration:} 
+Redundancy is varied as an experimental factor, but its realization is scheme-dependent. 
+For RS-protected configurations (e.g., Yin--Yang with an outer Reed--Solomon layer), redundancy is parameterized by the number of parity peptides $r$ added per block (e.g., $r \\in \\{8,16,32,64,128\\}$). 
+For fountain-based configurations, redundancy is parameterized by an overhead factor $\\rho$, i.e., transmitting $(1+\\rho)$ encoded droplets relative to the $k_{\\mathrm{F}}$ source symbols. 
+For each scheme, the corresponding redundancy parameter (either $r$ or $\\rho$) is swept while all remaining pipeline components and channel parameters are kept fixed, to quantify the redundancy--reliability trade-off under identical channel conditions.
+
+
+\\item \\textbf{Input size:} Files spanning a wide size range (from bytes up to megabytes) are used to expose size-dependent failure behavior. 
+
+
+
+\\paragraph{Controlled factors.}
+\\label{sec:method_factors}
+The following factors are kept fixed across all experiments unless stated otherwise:
+
+  \\item \\textbf{Peptide alphabet and mapping interface:} A restricted peptide alphabet $\\Sigma$ with $|\\Sigma|=8$ is used
+  throughout, corresponding to $\\log_2|\\Sigma|=3$ bits of symbol capacity per residue.
+
+  \\item \\textbf{Peptide length and framing:} Peptides have a fixed length $L$ (default $L=18$). An optional index prefix
+  may be enabled, which reduces payload capacity accordingly.
+
+  \\item \\textbf{Evaluation criteria:} The same end-to-end success criterion and the same evaluation metrics are applied
+  to all schemes.
+
+
+\\paragraph{Channel settings (evaluation scenarios).}
+Two fixed channel parameterizations are evaluated:
+
+  \\item \\textbf{Uniform (sequence-agnostic) channel:} a stress-test setting with sequence-independent error behavior.
+  \\item \\textbf{Score-driven (sequence-aware) channel:} a setting in which per-peptide error rates depend on predicted
+  sequence quality (Section~\\ref{sec:method_error_model}).
+
+All cross-scheme comparisons are interpreted \\emph{within} the same channel setting. The uniform setting is used to
+establish a conservative reference point, while the score-driven setting is used for the main comparisons.
+
+
+\\paragraph{Success criterion.}
+\\label{sec:method_success_criterion}
+A run is considered successful if the reconstructed byte sequence matches the original input exactly. Let
+$\\mathbf{x}$ denote the original byte sequence and $\\hat{\\mathbf{x}}$ the decoded output. Success is defined as:
+\\[
+\\mathrm{success} = \\mathbf{1}\\!\\left[\\hat{\\mathbf{x}}=\\mathbf{x}\\right].
+\\]
+No additional checksum layer is used in the RS-protected pipelines; therefore correctness is evaluated solely by
+end-to-end equality of bytes. The Fountain configuration includes a per-droplet cyclic redundancy check (CRC) that
+is used only to discard corrupted droplets (treating them as erasures); end-to-end correctness is still evaluated
+by byte equality.
+
+\\paragraph{Evaluation assumptions.}
+\\label{sec:method_assumptions}
+The evaluation makes simplifying assumptions that follow from the implemented pipeline:
+
+  \\item \\textbf{Metadata is available to the decoder.} Parameters required for decoding (e.g., block structure,
+  padding information, and optional indexing settings) are assumed to be known during decoding. The current pipeline
+  does not embed this metadata into peptide payloads.
+
+  \\item \\textbf{One observation per peptide.} Each peptide is evaluated as a single observed sequence after corruption.
+  The pipeline does not simulate multiple reads, confidence scores, or consensus calling.
+
+  \\item \\textbf{Stochastic channel without fixed seeding by default.} Error application is randomized; no fixed seeding
+  strategy is used unless explicitly enabled for debugging or replication.
+
+
+
+"
+            },
+            {
+              "id": "notation",
+              "title": "Notation",
+              "content": "
+\\label{sec:method_notation}
+
+
+
+  \\item[$\\mathbf{x}$, $\\hat{\\mathbf{x}}$] Original input bytes and decoded output bytes.
+
+  \\item[$\\Sigma$] Restricted peptide alphabet, $|\\Sigma|=8$, $\\Sigma=\\{\\texttt{A,V,L,S,T,F,Y,E}\\}$ (chosen as in \\cite{Ng2021}).
+
+  \\item[$L$] Peptide length in residues.
+
+  \\item[$k_{\\mathrm{RS}}, r, n$] RS block parameters: $k_{\\mathrm{RS}}$ data peptides,
+  $r$ parity peptides, $n=k_{\\mathrm{RS}}+r$.
+
+  \\item[$B$] Number of bytes used to represent one peptide in the RS layer after packing and byte alignment.
+
+  \\item[$p_{\\mathrm{loss}}, p_{\\mathrm{mut}}, p_{\\mathrm{ins}}, p_{\\mathrm{shuf}}$] Per-residue probabilities for
+  deletion, substitution, insertion, and local shuffling.
+
+  \\item[$L_{\\mathrm{idx}}$] Optional index-prefix length (residues) when indexing is enabled.
+
+  \\item[$L_{\\mathrm{payload}}$] Payload residues per peptide, typically $L_{\\mathrm{payload}} = L - L_{\\mathrm{idx}}$.
+
+  \\item[$\\phi,\\phi^{-1}$] Fixed 3-bit $\\leftrightarrow$ residue mapping over $\\Sigma$ (baseline mapping / RS serialization)
+  and its inverse.
+
+  \\item[$\\psi,\\psi^{-1}$] Yin--Yang constrained payload mapping and its inverse.
+
+  \\item[$\\rho$] Fountain overhead factor: transmit $(1+\\rho)$ droplets per $k_{\\mathrm{F}}$ source symbols.
+
+  \\item[$k_{\\mathrm{F}}$] Number of fountain source symbols (packets).
+
+  \\item[$d_{\\mathrm{int}}$] Optional interleaving depth applied before RS block formation.
+
+  \\item[$P,\\tilde{P}$] Transmitted peptide list $P$ and observed (corrupted) list $\\tilde{P}$ under the channel.
+
+  \\item[$N$] Number of peptides in a peptide list, $P=(P^{(1)},\\dots,P^{(N)})$.
+
+  \\item[$\\pi^{(j)}$] The $j$-th peptide, written as $\\pi^{(j)}=(p_1^{(j)},\\dots,p_L^{(j)})$ with residues $p_i\\in\\Sigma$.
+
+  \\item[$u$] Uniform random draw $u\\sim \\mathrm{Unif}(0,1)$ used by per-position Bernoulli operators.
+
+  \\item[$Q(\\pi)$] (Score-driven channel) Predicted peptide quality/score used to derive per-peptide error rates.
+
+  \\item[$p_{\\min}, p_{\\max}$] (Score-driven channel) Lower/upper bounds for induced base error probabilities.
+
+  \\item[$RSr$] Shorthand for a Reed--Solomon configuration with $r$ parity symbols (e.g., \\texttt{RS8}, \\texttt{RS16}, \\ldots).
+
+
+
+
+
+
+"
+            }
+          ]
+        },
+        {
+          "id": "input_data_and_experimental_setup",
+          "title": "Input Data and Experimental Setup",
+          "content": "...",
+          "subsections": [
+            {
+              "id": "input_corpus",
+              "title": "Input corpus",
+              "content": "The evaluation uses a corpus of files whose sizes follow a power-of-two schedule from 1 byte up to 1 MB. To keep
+runtime and memory bounded, experiments are limited to inputs of at most 1 MB. Larger files can be handled by
+partitioning the byte stream into fixed-size chunks (e.g., 1 MB per chunk) and treating each chunk as an
+independent encoding/decoding instance; the original file is then reconstructed by concatenating decoded chunks in
+their recorded order.
+
+Input files are generated synthetically and stored on disk prior to evaluation. For each size $2^e$ with
+$e \\in \\{0,\\dots,20\\}$, a file of exactly $2^e$ bytes is created by sampling from the operating system entropy
+source and filtering the stream to a restricted set of printable ASCII characters (letters, digits, whitespace,
+and common punctuation). The resulting stream is truncated to the target size. Because filtering is applied, the
+byte distribution is not uniform over $\\{0,\\dots,255\\}$ but biased toward the allowed character set.
+
+The same persisted corpus is reused across all configurations and runs. Reproducibility is ensured by keeping the
+generated input files fixed throughout the experiment campaign (rather than regenerating them for each run).
+"
+            },
+            {
+              "id": "experimental_setup_and_run_definition",
+              "title": "Experimental Setup and Run Definition",
+              "content": "\\label{sec:method_configurations}
+
+A primary comparison dimension is the redundancy setting, using the scheme-specific parameterization introduced in
+Section~\\ref{sec:method_objective_scope} (RS parity size $r$ for RS-based configurations and overhead factor $\\rho$
+for fountain-based configurations). Selected configurations additionally enable interleaving with fixed depth to
+spread correlated corruption across blocks, and optional indexing to support peptide placement during decoding. All
+other pipeline components follow the controlled factors in Section~\\ref{sec:method_factors}.
+
+Experiments use the residue-level channel defined in Section~\\ref{sec:method_error_model} under two fixed
+parameterizations: a uniform (sequence-agnostic) setting and a score-driven (sequence-aware) setting. The operator
+definitions, their application order, and the per-residue probabilities are specified there. Cross-scheme
+comparisons are evaluated within the same channel setting.
+
+
+
+\\label{sec:method_run_logging}
+
+A run is defined by the tuple \\emph{(input file, redundancy configuration, channel parameters)}. The pipeline in Fig.~\\ref{fig:method_pipeline_overview} is executed once per run (encode $\\rightarrow$ channel $\\rightarrow$ decode), and correctness is evaluated using the success criterion in Section~\\ref{sec:method_success_criterion}. For each run, the implementation logs one row in a tabular results file, including the input identifier, encoding scheme, redundancy setting (RS parity profile $r$ or fountain overhead $\\rho$), peptide length and indexing parameters, the channel probabilities $(p_{\\mathrm{loss}}, p_{\\mathrm{mut}}, p_{\\mathrm{ins}}, p_{\\mathrm{shuf}})$, original and decoded sizes, and the error metrics defined later in this chapter.
+
+The channel model is stochastic and is driven by a pseudo-random number generator that is currently initialized without an explicit seed. Consequently, repeated executions of the same file--configuration pair may yield different corruption realizations and outcomes.
+
+Uniform stress tests use multiple independent channel draws per setting, whereas score-driven runs use a single draw per file--configuration pair for coverage; seeds are not logged, so exact replay is not enabled in the current script.
+
+"
+            }
+          ]
+        },
+        {
+          "id": "encoding_pipeline",
+          "title": "Encoding Pipeline",
+          "content": "\\label{sec:method_encoding_pipeline} 
+An input byte sequence $\\mathbf{x}$ is transformed into a peptide stream over the restricted alphabet $\\Sigma$ with target length $L$ and may be protected by an outer redundancy mechanism (e.g., an RS parity layer or fountain-style overhead, depending on the configuration). The notation follows Section~\\ref{sec:method_notation}.",
+          "subsections": [
+            {
+              "id": "source_coding_huffman_baseline",
+              "title": "Source coding (Huffman baseline)",
+              "content": "\\label{sec:method_huffman}
+
+For the Huffman-baseline configuration, the input file is treated as an arbitrary byte sequence
+$\\mathbf{x}\\in\\{0,\\dots,255\\}^m$, where $m=|\\mathbf{x}|$.
+ A per-file Huffman code is constructed from the empirical byte
+distribution of that file, and the file is then compressed using this code, yielding a variable-length
+compressed representation.
+
+Implementation-wise, Huffman coding is realized using the \\texttt{dahuffman \\url{https://pypi.org/project/dahuffman/}} library. The encoder
+constructs a codec , i.e., the Huffman alphabet consists of
+byte symbols and the codebook is derived from the file itself. The file is then encoded , which produces a byte-aligned compressed bytestream. For subsequent
+stages that operate on bits, this bytestream is converted into a binary string representation
+(e.g., \\texttt{'0101\\ldots'}) using a deterministic bytes-to-bitstring conversion.
+
+\\paragraph{Implementation note:}
+The Huffman baseline uses \\texttt{dahuffman} to construct a per-file Huffman codec directly from the input bytes.
+Internally, the library derives the symbol distribution by a single pass over the provided data and counting
+occurrences of each byte value using \\texttt{collections.Counter}. Since iterating over a Python \\texttt{bytes} object
+yields integers in $\\{0,\\dots,255\\}$, the Huffman alphabet is exactly the set of byte symbols observed in the file
+and their empirical frequencies. Based on these counts, \\texttt{dahuffman} builds a standard prefix-free Huffman code
+(via repeated merging of the two least frequent nodes using a priority queue) and stores a code table mapping each
+byte symbol to a variable-length bit codeword.
+
+Although the code is bit-oriented, the library outputs a \\texttt{bytes} bytestream. To make decoding unambiguous when
+the final codeword does not align to an 8-bit boundary, the implementation uses an explicit end-of-stream marker in
+the code tree and emits it at the end of encoding. During decoding, the bit reader stops once this marker is
+encountered, so any remaining padding bits in the last output byte are ignored safely.
+
+Consistent with the study scope (Section~\\ref{sec:method_assumptions}), the decoder is assumed to
+have access to the same Huffman codebook/codec object used at encoding time; codebook transmission
+and its overhead are not modeled. Decoding reverses the above steps: the stored bitstring is
+converted back to bytes and decoded to recover $\\mathbf{x}$.
+
+No additional whitening or scrambling is applied. Consequently, any statistical structure induced by
+Huffman coding is preserved and propagated into the subsequent bit-to-residue mapping stage.
+"
+            },
+            {
+              "id": "yin_yang_style_constrained_mapping",
+              "title": "Yin-Yang-style constrained mapping",
+              "content": "The Yin--Yang codec uses a redundant 2-bit-to-residue payload mapping that introduces controlled encoding freedom
+while remaining exactly decodable. 
+The payload bitstream is partitioned into consecutive 2-bit symbols $d_k\\in\\{0,1\\}^2$. Each symbol determines two
+candidate residues via the fixed ``Yang'' mapping $\\psi$ (Table~\\ref{tab:method_yinyang_mapping}), and the encoder
+selects one candidate using the ``Yin'' rule below.
+
+
+Table~\\ref{tab:method_yinyang_mapping} lists the candidate pairs $\\psi(d_k)$. Decoding uses a deterministic inverse
+mapping $\\psi^{-1}:\\Sigma\\rightarrow\\{0,1\\}^2$ where both residues in each pair map back to the same 2-bit value;
+therefore, encoding has two choices per symbol while decoding remains unambiguous.
+
+
+For the next symbol $d_k$, let $\\{c_0,c_1\\}=\\psi(d_k)$ be the two candidates. The encoder maintains the current payload prefix (within the current peptide) and chooses the candidate with smaller penalty:
+\\[
+c^\\star \\;=\\; \\arg\\min_{c\\in\\{c_0,c_1\\}}\\; \\Pi(c \\mid \\text{current payload prefix}).
+\\]
+The penalty $\\Pi(\\cdot)$ is an offline heuristic that approximates ``synthesis-friendly'' behavior (e.g., high PepSySco-like quality) without querying an external scoring service during encoding.
+
+Hard constraints are enforced by adding a very large penalty (effectively forbidding the choice) whenever a candidate would violate:
+
+    \\item \\textbf{No long identical runs:} forbid more than 2 identical residues in a row.
+    \\item \\textbf{No long hydrophobic runs:} forbid more than 2 consecutive residues from
+    $H=\\{\\texttt{V,L,F,Y}\\}$.
+    \\item \\textbf{No long \\texttt{E} runs:} forbid more than 2 consecutive \\texttt{E}.
+\\item \\textbf{Aromatic-count constraint:} let $A=\\{\\texttt{F},\\texttt{Y}\\}$ denote the set of aromatic residues. The per-peptide aromatic count is constrained by
+\\[
+N_A(\\pi)\\;\\le\\; \\kappa_A(L_{\\mathrm{payload}}),
+\\qquad
+\\kappa_A(L_{\\mathrm{payload}})=\\max\\!\\bigl(1,\\min(3,\\lfloor L_{\\mathrm{payload}}/6\\rfloor)\\bigr),
+\\]
+where $N_A(\\pi)=\\sum_{i=1}^{|\\pi|}\\mathbf{1}[p_i\\in A]$.
+
+\\item \\textbf{\\texttt{E}-count constraint:} the number of \\texttt{E} residues per peptide is constrained by
+\\[
+N_E(\\pi)\\;\\le\\; \\kappa_E(L_{\\mathrm{payload}}),
+\\qquad
+\\kappa_E(L_{\\mathrm{payload}})=\\max\\!\\bigl(2,\\min(6,\\lfloor L_{\\mathrm{payload}}/3\\rfloor)\\bigr),
+\\]
+where $N_E(\\pi)=\\sum_{i=1}^{|\\pi|}\\mathbf{1}[p_i=\\texttt{E}]$.
+
+
+
+    
+
+
+Soft preferences contribute small additive penalties/bonuses, including (i) penalizing hydrophobic residues in $H$, (ii) penalizing aromatics in $A$, (iii) preferring \\texttt{S} and \\texttt{T}, and (iv) a small preference against immediate repeats. These rules bias the emitted peptides away from long hydrophobic stretches and excessive aromatics while preserving exact decodability via $\\psi^{-1}$."
+            },
+            {
+              "id": "bitstream_to_peptides_packing_padding_indexing_rs_interface",
+              "title": "Bitstream to peptides (packing, padding, indexing, RS interface)",
+              "content": "\\label{sec:method_bitstream_padding}
+Downstream stages operate on (i) residue-symbol streams and (ii) a fixed-size byte-vector interface for RS processing. Therefore, padding/normalization may be introduced at two boundaries:
+
+    \\item \\textbf{Payload-symbol alignment.}
+    For the Huffman baseline (fixed 3-bit mapping), the bitstream is padded at the end with $0$-bits to a multiple of 3 so it can be partitioned into consecutive 3-bit symbols; the number of added bits is recorded and removed after payload reconstruction during decoding.
+    For the Yin--Yang codec (2-bit payload symbols), the bitstream is padded with trailing $0$-bits to a multiple of 2; in the current pipeline (bytes $\\rightarrow$ bits), this padding is typically zero but is retained for completeness and removed during decoding.
+    \\item \\textbf{RS symbol representation.}
+    For RS-based configurations, each peptide is converted into a fixed-size byte-vector representation prior to RS encoding/decoding. This conversion may require deterministic normalization/padding as needed to meet the fixed byte-vector length; the necessary information for consistent inverse conversion is retained for decoding.
+
+
+
+\\label{sec:method_bit_to_peptide}
+
+\\emph{Huffman baseline (fixed 3-bit mapping).}
+After bitstream padding and alignment, the payload is partitioned into consecutive 3-bit groups. Each 3-bit group is interpreted as an integer in $\\{0,\\dots,7\\}$ and mapped to a residue in $\\Sigma$ via a fixed bijection $\\phi:\\{0,1\\}^3\\rightarrow\\Sigma$. The evaluation uses the fixed mapping shown in Table~\\ref{tab:method_alphabet_mapping}, i.e., $\\phi(000)=\\texttt{A}$, $\\phi(001)=\\texttt{V}$, \\dots, $\\phi(111)=\\texttt{E}$.
+
+\\emph{Yin--Yang payload mapping.}
+For the Yin--Yang codec, payload mapping follows Section~\\ref{sec:method_yinyang}. Each payload residue carries
+exactly 2 bits (before indexing and outer-code overhead).
+
+
+In both cases, the resulting payload residue stream is chunked sequentially into peptides of target payload length $L_{\\mathrm{payload}}=L-L_{\\mathrm{idx}}$ when indexing is enabled (Section~\\ref{sec:method_index_prefix}), or $L_{\\mathrm{payload}}=L$ otherwise. The final data peptide may contain fewer than $L_{\\mathrm{payload}}$ residues if the residue stream does not end on a peptide boundary. No residue-level padding is added at this stage; instead, per-peptide length information is retained so that reconstructed data peptides can be trimmed consistently after outer-code decoding.
+
+\\begin{table}[H]
+\\centering
+\\caption{Restricted amino-acid alphabet $\\Sigma$ (size 8) and fixed 3-bit mapping $\\phi$ used for bit-to-residue conversion (baseline mapping and RS serialization).}
+\\label{tab:method_alphabet_mapping}
+\\begin{tabular}{cc|cc}
+\\hline
+\\textbf{3-bit code} & \\textbf{Residue} & \\textbf{3-bit code} & \\textbf{Residue} \\\\
+\\hline
+000 & A & 100 & T \\\\
+001 & V & 101 & F \\\\
+010 & L & 110 & Y \\\\
+011 & S & 111 & E \\\\
+\\hline
+\\end{tabular}
+\\end{table}
+
+\\begin{table}[H]
+\\centering
+\\caption{Yin--Yang ``Yang'' mapping $\\psi$: each 2-bit payload symbol maps to a pair of candidate residues. The encoder selects one residue from the pair (Yin rule), while the decoder maps either residue back to the same 2-bit value.}
+\\label{tab:method_yinyang_mapping}
+\\begin{tabular}{c c c}
+\\hline
+\\textbf{2-bit symbol} & \\textbf{Candidate pair } & \\textbf{Decoder inverse } \\\\
+\\hline
+00 & $\\{\\texttt{F},\\texttt{E}\\}$ & $\\texttt{F},\\texttt{E}\\mapsto 00$ \\\\
+01 & $\\{\\texttt{Y},\\texttt{S}\\}$ & $\\texttt{Y},\\texttt{S}\\mapsto 01$ \\\\
+10 & $\\{\\texttt{V},\\texttt{T}\\}$ & $\\texttt{V},\\texttt{T}\\mapsto 10$ \\\\
+11 & $\\{\\texttt{L},\\texttt{A}\\}$ & $\\texttt{L},\\texttt{A}\\mapsto 11$ \\\\
+\\hline
+\\end{tabular}
+\\end{table}
+
+
+
+\\label{sec:method_index_prefix}
+In some configurations, each data peptide starts with an index prefix of length $L_{\\mathrm{idx}}$ residues that encodes the peptide position within the encoded sequence. This reduces the payload capacity per data peptide from $3L$ to $3(L-L_{\\mathrm{idx}})$ bits for the baseline mapping.
+For Yin--Yang, the payload capacity is $2(L-L_{\\mathrm{idx}})$ bits, while the index prefix remains encoded using the
+fixed 3-bit mapping $\\phi$ and is treated as metadata (removed before Yin--Yang payload reconstruction).
+Parity peptides produced by the RS layer do not require an interpretable index. When indexing is enabled, the decoder uses index information only to place data peptides (and to identify missing positions as erasures); the prefix of parity peptides is ignored by the placement procedure. 
+
+
+\\label{sec:method_encoding_to_rs}
+RS operates on byte symbols. For peptide-level RS protection, each peptide is mapped to a fixed-length byte vector used as the RS symbol representation. This serialization uses the fixed 3-bit mapping $\\phi^{-1}:\\Sigma\\rightarrow\\{0,1\\}^3$ (Table~\\ref{tab:method_alphabet_mapping}) \\emph{regardless of the payload codec} (Huffman baseline, Yin--Yang, etc.).
+Internally, peptides are first normalized to the configured peptide length $L$ and then packed into bytes (3 bits per residue), with padding to the next byte boundary. For peptide length $L$, the resulting number of bytes per peptide is
+\\[
+B = \\left\\lceil \\frac{3L}{8} \\right\\rceil .
+\\]
+For the default $L=18$, this yields $B=\\lceil 54/8\\rceil=7$ bytes per peptide. The encoder retains the information required to invert the normalization after RS decoding so that reconstructed data peptides can be trimmed consistently before peptide-to-bit reconstruction.
+Peptides are marked as erasures during RS decoding if they are missing/empty, exceed length $L$, contain residues outside $\\Sigma$, or (when indexing is enabled) carry an invalid index prefix that prevents consistent placement.
+
+After the RS layer outputs corrected data peptides, index prefixes are removed if present and the payload residues are concatenated. Each residue is mapped back to 2-bit symbols using $\\psi^{-1}$, yielding the reconstructed payload bitstream. The recorded payload-padding bits (typically zero) are removed, and the bitstream is converted to bytes and truncated to the original file length to recover $\\mathbf{x}$.
+
+
+"
+            }
+          ]
+        },
+        {
+          "id": "outer_redundancy_and_error_protection",
+          "title": "Outer Redundancy and Error Protection",
+          "content": "...",
+          "subsections": [
+            {
+              "id": "reed_solomon_outer_code",
+              "title": "Reed-Solomon outer code",
+              "content": "An outer Reed--Solomon (RS) layer can be applied to the peptide stream produced by an encoding
+scheme. RS operates on the byte-level representation of peptides introduced in
+Section~\\ref{sec:method_encoding_to_rs} and is used to correct missing or corrupted peptides
+at the block level.
+
+
+RS protection is applied independently to consecutive blocks of peptides. Each block contains
+$k_{\\mathrm{RS}}$ data peptides and $r$ parity peptides, yielding total block length
+\\[
+n = k_{\\mathrm{RS}} + r .
+\\]
+The parity parameter $r$ controls redundancy and is evaluated over multiple profiles, while $k_{\\mathrm{RS}}$
+is held constant across profiles (default $k_{\\mathrm{RS}}=32$ unless stated otherwise). RS coding is performed over GF$(2^8)$, so the maximum code length is $n\\le 255$; when $n<255$, a shortened RS
+configuration is used.
+
+
+\\label{sec:method_peptide_bytes}
+For RS processing, each peptide is represented as a fixed-length byte vector of length $B$
+(Section~\\ref{sec:method_encoding_to_rs}). This representation is internal to error correction;
+the storage abstraction remains a sequence of peptides over the residue alphabet $\\Sigma$.
+
+
+\\label{sec:method_rs_columnwise}
+RS redundancy is applied column-wise across the $B$ byte positions. For one block, let the $k_{\\mathrm{RS}}$
+data peptides be represented as byte vectors and arranged into a matrix
+\\[
+\\mathbf{M} \\in \\{0,\\dots,255\\}^{k_{\\mathrm{RS}} \\times B},
+\\]
+where each row corresponds to a peptide and each column to a byte position within the packed
+representation.
+
+For each column $j \\in \\{1,\\dots,B\\}$, an RS encoder over GF$(2^8)$ maps the $k_{\\mathrm{RS}}$ data bytes
+$(M_{1,j},\\dots,M_{k_{\\mathrm{RS}},j})$ to $r$ parity bytes $(M_{k_{\\mathrm{RS}}+1,j},\\dots,M_{k_{\\mathrm{RS}}+r,j})$. Collecting parity
+bytes across all $B$ columns yields $r$ parity byte vectors of length $B$, which are mapped back
+to $r$ parity peptides using the same packing and residue mapping conventions as for data peptides.
+
+Because a single peptide corresponds to one row of $\\mathbf{M}$, peptide-level corruption can
+manifest as correlated byte errors across multiple RS codewords (one per column), i.e., as a burst
+affecting several RS symbols in parallel.
+
+\\label{sec:method_rs_lastblock}
+The number of data peptides produced by the mapping stage is not necessarily a multiple of $k_{\\mathrm{RS}}$.
+If the last block contains fewer than $k_{\\mathrm{RS}}$ data peptides, the encoder applies the same RS profile
+with an effective data length $k_{\\text{last}}<k_{\\mathrm{RS}}$ and records $k_{\\text{last}}$ as metadata for
+decoding. No explicit end-of-stream marker is appended at the peptide level; termination is
+determined by the recorded block structure together with the padding metadata from
+Section~\\ref{sec:method_bitstream_padding}.
+
+
+\\label{sec:method_rs_interleaving}
+Selected configurations enable interleaving with depth $d_{\\mathrm{int}}$ (e.g., $d_{\\mathrm{int}}=4$). In the implementation,
+interleaving permutes the peptide sequence (and associated per-peptide metadata such as stored
+lengths, where applicable) \\emph{before} RS block formation and RS encoding. RS parity is therefore
+computed over the interleaved ordering.
+"
+            },
+            {
+              "id": "systematic_lt_fountain_coding",
+              "title": "Systematic LT fountain coding",
+              "content": "\\label{sec:method_fountain}
+
+As an alternative to RS-based protection, the pipeline supports a fountain-based configuration that provides
+rateless redundancy at the packet level. The input byte sequence is partitioned into $k_{\\mathrm{F}}$ fixed-length source
+symbols (with zero-padding in the final symbol if required). The encoder then generates a stream of fixed-length
+droplets. Each droplet corresponds to one XOR equation over a subset of the $k_{\\mathrm{F}}$ source symbols and carries an
+integrity check (CRC) so that corrupted droplets can be discarded at the decoder.
+
+Redundancy is parameterized by an overhead factor $\\rho$, meaning that the encoder transmits more droplets than
+source symbols. In addition, a minimum droplet budget is enforced for very small inputs so that decoding is not
+underdetermined even when $\\rho$ is small. Fountain evaluation follows the corpus input-size limit in
+Section~\\ref{sec:method_input_corpus}.
+
+
+Droplets are represented as fixed-length byte packets whose bit length is chosen to align with the peptide payload
+bit length under the fixed 3-bit residue packing used by the RS serialization and the fountain configuration. Let $L$ be the peptide length and
+$L_{\\mathrm{idx}}$ the optional index-prefix length, so the payload residue length is
+$L_{\\mathrm{payload}} = L - L_{\\mathrm{idx}}$ and the payload capacity per peptide is
+\\[
+C_{\\mathrm{pep}} = 3L_{\\mathrm{payload}} \\quad \\text{bits}.
+\\]
+The droplet packet size in bytes is chosen as the smallest positive integer $b_{\\mathrm{drop}}$ such that
+$8b_{\\mathrm{drop}}$ is divisible by $C_{\\mathrm{pep}}$,
+ensuring that each droplet spans an integer number of peptides.
+
+Each droplet packet consists of: (i) a compact header containing a seed and a degree, (ii) a body containing the
+bytewise XOR of the selected source symbols, (iii) zero padding inside the protected body if needed to keep packet
+length fixed, and (iv) a CRC computed over the preceding bytes. The subset of source-symbol indices is not
+transmitted explicitly; instead, it is reconstructed deterministically from the header. For degree $1$, the index is derived directly from the seed (e.g., by modular reduction). For degrees larger than $1$, a pseudo-random generator initialized from the seed selects the requested number of distinct indices from $\\{0,\\dots,k_{\\mathrm{F}}-1\\}$.
+The construction is systematic: it first emits $k_{\\mathrm{F}}$ degree-1 droplets that directly carry each source symbol, and then emits additional random droplets until the target droplet count implied by $\\rho$ is reached. For the random
+part, degrees are sampled from a robust soliton distribution over $\\{1,\\dots,k_{\\mathrm{F}}\\}$.
+Droplet packets are concatenated into a byte stream and converted into peptides using the existing fixed 3-bit
+packing and residue mapping (Section~\\ref{sec:method_bit_to_peptide} and Table~\\ref{tab:method_alphabet_mapping}),
+with optional index prefixes handled as described in Section~\\ref{sec:method_index_prefix}. Fountain decoding is
+described in Section~\\ref{sec:method_fountain_decode}.
+"
+            }
+          ]
+        },
+        {
+          "id": "residue_level_channel_and_error_model",
+          "title": "Residue-Level Channel and Error Model",
+          "content": "This section defines the stochastic channel that perturbs peptide sequences after encoding (and, where enabled,
+interleaving and outer protection). The channel operates at the residue level and is applied independently to
+each peptide; it does not change the global peptide order.",
+          "subsections": [
+
+            {
+              "id": "channel_definition_operators_and_parameterization",
+              "title": "Channel definition, operators, and parameterization",
+              "content": "\\label{sec:method_error_overview}
+Let $\\pi=(p_1,\\dots,p_\\ell)$ be an encoded peptide of length $\\ell\\le L$.
+The channel produces an observed sequence $\\tilde{\\pi}$ by applying four residue-level operators. The resulting
+$\\tilde{\\pi}$ may have length different from both the target length $L$ and the original length $\\ell$.
+
+
+
+\\paragraph{Error operators.}
+
+
+\\item \\textbf{Residue deletion (Alg.~\\ref{alg:err_deletion}).}
+For each residue position $i$, the residue $p_i$ is removed with probability $p_{\\mathrm{loss}}$. This reduces sequence length and can yield very short (or empty, $\\lvert \\tilde{\\pi} \\rvert = 0$) observed peptides for large deletion rates.
+
+\\item \\textbf{Residue substitution (Alg.~\\ref{alg:err_substitution}).}
+With probability $p_{\\mathrm{mut}}$, a residue $p_i$ is replaced by a different symbol drawn from $\\Sigma$. Substitution preserves length and maintains alphabet validity under the alphabet-restricted model.
+
+\\item \\textbf{Residue insertion (Alg.~\\ref{alg:err_insertion}).}
+With probability $p_{\\mathrm{ins}}$ per position, an additional symbol from $\\Sigma$ is inserted locally (before or after an existing residue, according to the implementation). Insertions increase sequence length and can create $\\lvert \\tilde{\\pi} \\rvert > L$.
+
+\\item \\textbf{Local shuffle (adjacent swap; Alg.~\\ref{alg:err_shuffle}).}
+With probability $p_{\\mathrm{shuf}}$ per eligible position, two neighboring residues are swapped. This preserves length and symbol multiset but changes local order. Shuffling is confined within a peptide and does not permute peptide order across the encoded sequence.
+
+
+Operators are applied in the fixed order
+\\[
+\\text{deletion} \\rightarrow \\text{substitution} \\rightarrow \\text{insertion} \\rightarrow \\text{local shuffle}.
+\\]
+Within each operator, trials are modeled as independent Bernoulli events at the residue-position level. The model
+abstracts away correlations such as position-specific biases or context-dependent error rates.
+
+
+
+
+
+
+
+
+
+
+
+Two parameterizations of $(p_{\\mathrm{loss}},p_{\\mathrm{mut}},p_{\\mathrm{ins}},p_{\\mathrm{shuf}})$ are provided.
+
+\\paragraph{(1) Score-driven, sequence-aware parameterization (PepSySco-based ).}
+For each peptide sequence $\\pi$, a peptide synthesis score $Q(\\pi)\\in[0,1]$ is obtained from PepSySco \\url{https://tools.iedb.org/pepsysco/}, where larger
+values indicate a higher predicted likelihood of successful synthesis \\cite{Gutman2022}.
+The score is converted into a per-peptide base error rate
+\\[
+p(\\pi) = p_{\\min} + (1 - Q(\\pi)) \\cdot p_{\\max},
+\\qquad p_{\\max}=0.02,p_{\\min}\\approx 0.00
+\\]
+and the per-residue operator probabilities used for that peptide are set to
+\\[
+p_{\\mathrm{loss}}(\\pi)=p(\\pi),\\qquad
+p_{\\mathrm{mut}}(\\pi)=
+p_{\\mathrm{ins}}(\\pi)=
+p_{\\mathrm{shuf}}(\\pi)=\\frac{p(\\pi)}{2}.
+\\]
+Thus, peptides with lower synthesis scores are exposed to higher corruption rates, while high-scoring peptides
+experience fewer errors. This sequence-aware channel enables evaluation of mapping strategies whose goal is to
+generate ``easier'' peptide sequences, because the channel response depends on the produced sequence content.
+
+\\emph{Implementation detail.} PepSySco queries are executed in batch mode by submitting all peptides in one request
+(one sequence per line). The returned response is parsed to map each peptide to its score $Q(\\pi)$ and is saved for
+record-keeping. The implementation prints, per peptide, the original sequence, its score, the derived probabilities,
+and the post-channel sequence for traceability.
+
+\\paragraph{(2) Uniform, sequence-agnostic fallback parameterization.}
+If score-based parameterization is unavailable or undesirable (e.g., due to runtime or external tool dependence),
+a uniform channel is used in which fixed probabilities are applied to all peptides:
+\\[
+p_{\\mathrm{loss}} = 0.01,\\quad
+p_{\\mathrm{mut}} = 0.005,\\quad
+p_{\\mathrm{ins}} = 0.005,\\quad
+p_{\\mathrm{shuf}} = 0.005 .
+\\]
+This parameterization is synthetic and sequence-independent; it provides a stable baseline in which all encoding schemes experience the same residue-level error rates.\\paragraph{Implications for decoding.}
+Residue deletion and insertion change the observed peptide length and can therefore violate downstream assumptions
+about fixed framing and symbol alignment. In the evaluation pipeline, decoding stages expect peptides to be
+interpretable under a target length $L$ and a deterministic mapping to an internal symbol/byte representation
+(Section~\\ref{sec:method_encoding_to_rs}). Consequently, length violations must be handled explicitly, either by
+marking affected peptides as erasures or by applying a deterministic normalization procedure
+(Section~\\ref{sec:method_erasures}).
+
+Beyond length changes, deletions introduce positional drift: removing one residue shifts the positions of
+all subsequent residues within the peptide. This can desynchronize the mapping from residues to payload bits and
+induces structured, burst-like corruption in any downstream representation that assumes fixed positions. As a
+result, a single deletion may affect multiple subsequent bits or symbols in parallel, increasing the effective
+difficulty for any outer redundancy mechanism operating on fixed-size symbols under limited redundancy.
+"
+            },
+                        {
+              "id": "algorithms",
+              "title": "Algorithms",
+              "content": "
+<section class=\"algorithm\" id=\"alg-err-deletion\">
+  <h3>Algorithm: Residue deletion operator (per-position Bernoulli drops with optional empty-peptide removal)</h3>
+
+
+  <p><strong>Require:</strong>
+    \\label{alg:err_deletion}
+    Peptide list \\( \\mathbf{P}=(\\pi^{(1)},\\dots,\\pi^{(N)}) \\),
+    deletion probability \\( p_{\\mathrm{loss}} \\),
+    flag \\( b_{\\mathrm{dropEmpty}} \\)
+  </p>
+  <p><strong>Ensure:</strong> Observed peptide list \\( \\tilde{\\mathbf{P}} \\)</p>
+
+  <ol class=\"algorithmic\">
+    <li>\\( \\tilde{\\mathbf{P}} \\gets \\langle\\ \\rangle \\)</li>
+    <li>
+      <strong>For</strong> \\( j \\gets 1 \\) to \\( N \\)
+      <ol>
+        <li>Let \\( \\pi^{(j)}=(p^{(j)}_1,\\dots,p^{(j)}_{L}) \\) with \\( p^{(j)}_i\\in\\Sigma \\)</li>
+        <li>\\( \\tilde{\\pi} \\gets \\langle\\ \\rangle \\)</li>
+        <li>
+          <strong>For</strong> \\( i \\gets 1 \\) to \\( L \\)
+          <ol>
+            <li>Draw \\( u \\sim \\mathrm{Unif}(0,1) \\)</li>
+            <li>
+              <strong>If</strong> \\( u \\ge p_{\\mathrm{loss}} \\)
+              <ol>
+                <li>Append \\( p^{(j)}_i \\) to \\( \\tilde{\\pi} \\)</li>
+              </ol>
+              <strong>EndIf</strong>
+            </li>
+          </ol>
+          <strong>EndFor</strong>
+        </li>
+        <li>
+          <strong>If</strong> \\( |\\tilde{\\pi}| > 0 \\) <strong>or</strong> \\( b_{\\mathrm{dropEmpty}} = 0 \\)
+          <ol>
+            <li>Append \\( \\tilde{\\pi} \\) to \\( \\tilde{\\mathbf{P}} \\)</li>
+          </ol>
+          <strong>EndIf</strong>
+        </li>
+      </ol>
+      <strong>EndFor</strong>
+    </li>
+    <li><strong>Return</strong> \\( \\tilde{\\mathbf{P}} \\)</li>
+  </ol>
+</section>
+
+<hr />
+
+<section class=\"algorithm\" id=\"alg-err-substitution\">
+  <h3>Algorithm: Residue substitution operator (uniform replacement excluding current residue)</h3>
+
+
+  <p><strong>Require:</strong>
+    \\label{alg:err_substitution}
+    Peptide list \\( \\mathbf{P}=(\\pi^{(1)},\\dots,\\pi^{(N)}) \\),
+    alphabet \\( \\Sigma \\),
+    substitution probability \\( p_{\\mathrm{mut}} \\)
+  </p>
+  <p><strong>Ensure:</strong> Observed peptide list \\( \\tilde{\\mathbf{P}} \\)</p>
+
+  <ol class=\"algorithmic\">
+    <li>\\( \\tilde{\\mathbf{P}} \\gets \\langle\\ \\rangle \\)</li>
+    <li>
+      <strong>For</strong> \\( j \\gets 1 \\) to \\( N \\)
+      <ol>
+        <li>Let \\( \\pi^{(j)}=(p^{(j)}_1,\\dots,p^{(j)}_{L}) \\) with \\( p^{(j)}_i\\in\\Sigma \\)</li>
+        <li>\\( \\tilde{\\pi} \\gets \\pi^{(j)} \\)</li>
+        <li>
+          <strong>For</strong> \\( i \\gets 1 \\) to \\( L \\)
+          <ol>
+            <li>Draw \\( u \\sim \\mathrm{Unif}(0,1) \\)</li>
+            <li>
+              <strong>If</strong> \\( u < p_{\\mathrm{mut}} \\)
+              <ol>
+                <li>\\( \\Sigma_i \\gets \\Sigma \\setdiff \\{p^{(j)}_i\\} \\)</li>
+                <li>
+                  <strong>If</strong> \\( |\\Sigma_i| > 0 \\)
+                  <ol>
+                    <li>Draw \\( a \\sim \\mathrm{Unif}(\\Sigma_i) \\)</li>
+                    <li>Set \\( \\tilde{p}^{(j)}_i \\gets a \\)</li>
+                  </ol>
+                  <strong>EndIf</strong>
+                </li>
+              </ol>
+              <strong>EndIf</strong>
+            </li>
+          </ol>
+          <strong>EndFor</strong>
+        </li>
+        <li>Append \\( \\tilde{\\pi} \\) to \\( \\tilde{\\mathbf{P}} \\)</li>
+      </ol>
+      <strong>EndFor</strong>
+    </li>
+    <li><strong>Return</strong> \\( \\tilde{\\mathbf{P}} \\)</li>
+  </ol>
+</section>
+
+<hr />
+
+<section class=\"algorithm\" id=\"alg-err-insertion\">
+  <h3>Algorithm: Residue insertion operator (independent insertions with random before/after placement)</h3>
+
+
+  <p><strong>Require:</strong>
+    \\label{alg:err_insertion}
+    Peptide list \\( \\mathbf{P}=(\\pi^{(1)},\\dots,\\pi^{(N)}) \\),
+    alphabet \\( \\Sigma \\),
+    insertion probability \\( p_{\\mathrm{ins}} \\)
+  </p>
+  <p><strong>Ensure:</strong> Observed peptide list \\( \\tilde{\\mathbf{P}} \\)</p>
+
+  <ol class=\"algorithmic\">
+    <li>\\( \\tilde{\\mathbf{P}} \\gets \\langle\\ \\rangle \\)</li>
+    <li>
+      <strong>For</strong> \\( j \\gets 1 \\) to \\( N \\)
+      <ol>
+        <li>Let \\( \\pi^{(j)}=(p^{(j)}_1,\\dots,p^{(j)}_{L}) \\) with \\( p^{(j)}_i\\in\\Sigma \\)</li>
+        <li>
+          <strong>If</strong> \\( L = 0 \\)
+          <ol>
+            <li>Append \\( \\pi^{(j)} \\) to \\( \\tilde{\\mathbf{P}} \\) <em>(empty peptides are left unchanged)</em></li>
+            <li><strong>continue</strong></li>
+          </ol>
+          <strong>EndIf</strong>
+        </li>
+        <li>\\( \\tilde{\\pi} \\gets \\langle\\ \\rangle \\)</li>
+        <li>
+          <strong>For</strong> \\( i \\gets 1 \\) to \\( L \\)
+          <ol>
+            <li>Draw \\( u \\sim \\mathrm{Unif}(0,1) \\)</li>
+            <li>
+              <strong>If</strong> \\( u < p_{\\mathrm{ins}} \\)
+              <ol>
+                <li>Draw \\( a \\sim \\mathrm{Unif}(\\Sigma) \\)</li>
+                <li>Draw \\( v \\sim \\mathrm{Unif}(0,1) \\)</li>
+                <li>
+                  <strong>If</strong> \\( v < 0.5 \\)
+                  <ol>
+                    <li>Append \\( a \\) to \\( \\tilde{\\pi} \\) <em>(insert before)</em></li>
+                    <li>Append \\( p^{(j)}_i \\) to \\( \\tilde{\\pi} \\)</li>
+                  </ol>
+                  <strong>Else</strong>
+                  <ol>
+                    <li>Append \\( p^{(j)}_i \\) to \\( \\tilde{\\pi} \\)</li>
+                    <li>Append \\( a \\) to \\( \\tilde{\\pi} \\) <em>(insert after)</em></li>
+                  </ol>
+                  <strong>EndIf</strong>
+                </li>
+              </ol>
+              <strong>Else</strong>
+              <ol>
+                <li>Append \\( p^{(j)}_i \\) to \\( \\tilde{\\pi} \\) <em>(no insertion)</em></li>
+              </ol>
+              <strong>EndIf</strong>
+            </li>
+          </ol>
+          <strong>EndFor</strong>
+        </li>
+        <li>Append \\( \\tilde{\\pi} \\) to \\( \\tilde{\\mathbf{P}} \\)</li>
+      </ol>
+      <strong>EndFor</strong>
+    </li>
+    <li><strong>Return</strong> \\( \\tilde{\\mathbf{P}} \\)</li>
+  </ol>
+</section>
+
+<hr />
+
+<section class=\"algorithm\" id=\"alg-err-shuffle\">
+  <h3>Algorithm: Local shuffle operator</h3>
+
+  <p><strong>Require:</strong>
+    \\label{alg:err_shuffle}
+    Peptide list \\( \\mathbf{P}=(\\pi^{(1)},\\dots,\\pi^{(N)}) \\),
+    shuffle probability \\( p_{\\mathrm{shuf}} \\)
+  </p>
+  <p><strong>Ensure:</strong> Observed peptide list \\( \\tilde{\\mathbf{P}} \\)</p>
+
+  <ol class=\"algorithmic\">
+    <li>\\( \\tilde{\\mathbf{P}} \\gets \\langle\\ \\rangle \\)</li>
+    <li>
+      <strong>For</strong> \\( j \\gets 1 \\) to \\( N \\)
+      <ol>
+        <li>Let \\( \\pi^{(j)}=(p^{(j)}_1,\\dots,p^{(j)}_{L}) \\) with \\( p^{(j)}_i\\in\\Sigma \\)</li>
+        <li>
+          <strong>If</strong> \\( L \\le 1 \\) <strong>or</strong> \\( p_{\\mathrm{shuf}} \\le 0 \\)
+          <ol>
+            <li>Append \\( \\pi^{(j)} \\) to \\( \\tilde{\\mathbf{P}} \\)</li>
+            <li><strong>continue</strong></li>
+          </ol>
+          <strong>EndIf</strong>
+        </li>
+        <li>\\( \\tilde{\\pi} \\gets \\pi^{(j)} \\)</li>
+        <li>
+          <strong>For</strong> \\( i \\gets 1 \\) to \\( L-1 \\)
+          <ol>
+            <li>Draw \\( u \\sim \\mathrm{Unif}(0,1) \\)</li>
+            <li>
+              <strong>If</strong> \\( u < p_{\\mathrm{shuf}} \\)
+              <ol>
+                <li>
+                  swap \\( (\\tilde{p}^{(j)}_i,\\tilde{p}^{(j)}_{i+1}) \\gets (\\tilde{p}^{(j)}_{i+1},\\tilde{p}^{(j)}_i) \\)
+                </li>
+              </ol>
+              <strong>EndIf</strong>
+            </li>
+          </ol>
+          <strong>EndFor</strong>
+        </li>
+        <li>Append \\( \\tilde{\\pi} \\) to \\( \\tilde{\\mathbf{P}} \\)</li>
+      </ol>
+      <strong>EndFor</strong>
+    </li>
+    <li><strong>Return</strong> \\( \\tilde{\\mathbf{P}} \\)</li>
+  </ol>
+</section>
+
+
+"
+            }
+          ]
+        },
+        {
+          "id": "decoding_and_erasure_handling",
+          "title": "Decoding and Erasure Handling",
+          "content": "\\label{sec:method_decoding}
+
+Let $\\tilde{\\mathcal{P}}$ denote the set (or sequence) of observed peptides after channel application, where some
+peptides may be missing, corrupted, shortened, or contain insertions. Decoding reconstructs an estimate
+$\\hat{\\mathbf{x}}$ of the original byte sequence $\\mathbf{x}$ by (i) validating and normalizing received peptides,
+(ii) applying the configured outer redundancy mechanism (RS or fountain), and (iii) reconstructing the scheme
+payload bitstream and applying the corresponding inverse source/codec stage (Huffman or Yin--Yang).",
+          "subsections": [
+            {
+              "id": "peptide_normalization_placement_and_erasure_rules",
+              "title": "Peptide normalization, placement, and erasure rules",
+              "content": "\\label{sec:method_erasures}
+
+Decoding assumes that structural metadata produced at encoding time is available (Section~\\ref{sec:method_objective_scope}),
+including the target peptide length $L$, optional index-prefix settings, and the block structure required by the
+outer redundancy mechanism.
+
+
+If an index prefix is enabled (Section~\\ref{sec:method_index_prefix}), each received data peptide is assigned
+to its intended position by parsing the index prefix. Missing indices are treated as erasures. If indexing is not
+enabled, the received peptides are assumed to be in the encoder-produced order (or in the order induced by the
+experimental run configuration).
+
+\\paragraph{Erasure criteria.}
+A peptide is marked as an erasure if at least one of the following conditions holds:
+
+    \\item the peptide is missing (no observation for an expected position);
+    \\item the peptide is empty;
+    \\item the peptide contains symbols outside the restricted alphabet $\\Sigma$;
+    \\item the observed length exceeds the target length ($|\\pi| > L$);
+    \\item indexing is enabled and the index prefix cannot be parsed or is inconsistent with the expected placement.
+
+Erasures are communicated to the outer decoder at the peptide granularity.
+
+
+\\label{sec:method_short_peptides}
+Peptides shorter than the target length ($|\\pi|<L$) may arise from residue deletions
+(Section~\\ref{sec:method_error_model}). Shortened peptides are not discarded by default. Instead, they are
+deterministically mapped to the fixed-size internal representation required by the outer decoder by interpreting
+each residue under the 3-bit mapping $\\phi^{-1}$ (Table~\\ref{tab:method_alphabet_mapping}), concatenating the
+resulting 3-bit symbols, and applying deterministic zero-padding to reach the required fixed length prior to
+byte packing (Section~\\ref{sec:method_encoding_to_rs}). Per-peptide length information retained from encoding is
+used after outer decoding to trim reconstructed data peptides back to their original residue lengths before
+payload concatenation. This policy preserves peptide-to-position alignment for block-based decoding."
+            },
+            {
+              "id": "outer_redundancy_decoding",
+              "title": "Outer redundancy decoding",
+              "content": "\\label{sec:method_outer_decode}
+
+Two outer decoding modes are supported by the evaluation design: peptide-level Reed--Solomon decoding and
+fountain-style peeling decoding. The active mode depends on the evaluated configuration.
+
+
+\\label{sec:method_rs_decoding}
+For RS-protected configurations, peptides are decoded block-by-block according to the stored block structure.
+Each peptide is mapped to a fixed-length byte vector of length $B$ (Section~\\ref{sec:method_encoding_to_rs}), and
+each RS block is represented as a matrix
+\\[
+\\hat{\\mathbf{M}} \\in \\{0,\\dots,255\\}^{n \\times B},
+\\]
+where each row corresponds to one peptide (data or parity) and each column corresponds to one byte position in the
+packed representation.
+
+RS decoding is performed \\emph{column-wise}: for each column $j\\in\\{1,\\dots,B\\}$, an RS decoder over GF$(2^8)$ is
+invoked on the length-$n$ symbol vector $(\\hat{M}_{1,j},\\dots,\\hat{M}_{n,j})$ together with the set of erased row
+indices from Section~\\ref{sec:method_erasures}. In the standard error/erasure model, column decoding is feasible
+whenever $2e + s \\le r$, where $e$ denotes the number of unknown symbol errors and $s$ the number of erased symbols
+given $r$ parity symbols.
+
+After decoding all columns, corrected columns are reassembled into corrected peptide byte vectors and mapped back to
+peptide sequences over $\\Sigma$. Parity peptides are then discarded, yielding a corrected stream of \\emph{data}
+peptides.
+
+If interleaving is enabled (Section~\\ref{sec:method_rs_interleaving}), RS decoding is performed in the interleaved domain, and the inverse interleaving permutation is applied \\emph{after} RS decoding to restore the original data peptide order for payload reconstruction."
+            },
+            {
+              "id": "fountain_decoding_crc_filtering_and_lt_peeling",
+              "title": "Fountain decoding: CRC filtering and LT peeling",
+              "content": "\\label{sec:method_fountain_decode}
+
+For fountain-style configurations, decoding is rateless and proceeds by collecting and processing received droplets
+until the $k_{\\mathrm{F}}$ source symbols can be recovered. The observed peptide stream is first converted back to a bytestream
+using the same inverse residue packing used elsewhere in the pipeline (Section~\\ref{sec:method_reconstruction}).
+The bytestream is then segmented into fixed-length droplet packets using the configured droplet packet length. Any
+incomplete trailing packet is ignored.
+
+
+Each reconstructed droplet packet is validated using its CRC. Packets that fail CRC validation are discarded and do
+not contribute equations, effectively converting residue-level corruption into droplet erasures. For each remaining
+packet, the decoder parses the header (seed and degree) and rebuilds the same subset of source-symbol indices that
+was used at encoding time. Degree-$1$ packets directly identify a single source symbol; for higher degrees, the
+decoder replays the seed-initialized pseudo-random selection to obtain the set of distinct indices.
+
+
+Each valid droplet defines one XOR equation over the unknown source symbols:
+the droplet body equals the bytewise XOR of the source symbols referenced by its rebuilt index set. Collecting all
+valid droplets yields a sparse system of XOR constraints, where sparsity is induced by the degree distribution.
+
+
+Decoding applies iterative peeling. All degree-$1$ equations are inserted into a work queue. When a degree-$1$
+equation reveals a source symbol, that symbol is recorded and XOR-eliminated from every other equation that
+contains it, reducing their degrees. Any equation that becomes degree-$1$ due to elimination is added to the queue.
+This process continues until either (i) all $k_{\\mathrm{F}}$ source symbols are recovered, or (ii) the queue becomes empty,
+indicating that decoding has stalled due to insufficient or inconsistent equations.
+
+If all source symbols are recovered, they are concatenated in index order and the result is truncated to the
+original file length (available as decoding metadata) to obtain the reconstructed byte sequence $\\hat{\\mathbf{x}}$.
+If peeling stalls before full recovery, the run is labeled as an outer-decoder failure under the criteria in
+Section~\\ref{sec:method_evaluation}.
+"
+            },
+            {
+              "id": "payload_reconstruction_and_inverse_source_coding",
+              "title": "Payload reconstruction and inverse source coding",
+              "content": "\\label{sec:method_reconstruction}
+
+After outer decoding, corrected \\emph{data} peptides are converted back to the payload bitstream. If an index prefix
+is enabled (Section~\\ref{sec:method_index_prefix}), the prefix residues are removed prior to payload concatenation.
+Residues are mapped back to 3-bit symbols using $\\phi^{-1}$ and concatenated in order. Alignment padding bits added
+during encoding to reach a multiple of 3 are removed using the recorded padding metadata
+(Section~\\ref{sec:method_bitstream_padding}).
+
+For the Huffman-baseline configuration, the recovered payload bitstream is decoded using the corresponding Huffman
+codebook to obtain $\\hat{\\mathbf{x}}$, which is compared to the original bytes $\\mathbf{x}$ according to the success
+criterion in Section~\\ref{sec:method_objective_scope}. For the Yin--Yang configuration, the
+recovered bitstream is passed through the inverse constrained mapping to reconstruct $\\hat{\\mathbf{x}}$. For fountain
+configurations , recovered source symbols are concatenated and truncated to the recorded original
+file length to yield $\\hat{\\mathbf{x}}$.
+
+"
+            }
+          ]
+        },
+        {
+          "id": "evaluation_protocol_and_metrics",
+          "title": "Evaluation Protocol and Metrics",
+          "content": "This section defines the metrics computed from each run and the minimal counters recorded in the run log so that all
+reported quantities can be derived automatically. A run yields an original byte sequence $\\mathbf{x}$ and a decoded
+byte sequence $\\hat{\\mathbf{x}}$ (Section~\\ref{sec:method_run_logging}). In addition, the encoder records
+run-level transmission counters such as the number of transmitted units and the total number of transmitted
+residues.",
+          "subsections": [
+            {
+              "id": "comparison_criterion",
+              "title": "Comparison criterion",
+              "content": "Across encoding schemes and redundancy settings, the primary objective is end-to-end reliability under identical
+channel conditions. Configurations are therefore compared first by perfect recovery rate (PRR). If two
+configurations reach comparable PRR on the same test set and channel, the tie is broken by transmitted overhead in
+bytes ($\\Delta_{\\mathrm{enc}}$); lower overhead is preferred. Secondary indicators (redundancy ratio, net rate, and
+utilization) are reported to explain where overhead originates (parity or droplet count, index prefixes, and
+padding), but they do not override the primary ordering by PRR and $\\Delta_{\\mathrm{enc}}$.
+
+"
+            },
+            {
+              "id": "evaluation_metrics",
+              "title": "Evaluation metrics",
+              "content": "Each run produces an original byte sequence $\\mathbf{x}$ and a decoded byte sequence $\\hat{\\mathbf{x}}$.
+Let $m=|\\mathbf{x}|$ and $\\hat{m}=|\\hat{\\mathbf{x}}|$ denote the corresponding lengths in bytes.
+
+
+\\textbf{Success} is a strict indicator that is $1$ only if the decoded output matches the original input byte-for-byte:\\\\
+\\[
+\\mathrm{success} \\;=\\; \\mathbf{1}\\!\\left[\\hat{\\mathbf{x}}=\\mathbf{x}\\right].
+\\]
+
+
+\\textbf{Perfect recovery rate (PRR)} reports how often perfect recovery occurs within a set of runs $\\mathcal{R}$:
+\\[
+\\mathrm{PRR} \\;=\\; \\frac{1}{|\\mathcal{R}|}\\sum_{r\\in\\mathcal{R}} \\mathrm{success}(r).
+\\]
+
+
+\\textbf{Length deviation} quantifies whether decoding produces an output that is shorter or longer than the original:
+\\[
+\\Delta_m \\;=\\; \\hat{m} - m,
+\\]
+reported together with the magnitude $|\\Delta_m|$.
+
+
+When $m\\neq \\hat{m}$, only the first $m_{\\min}$ bytes exist in both sequences and can be compared position-wise:
+\\[
+m_{\\min} \\;=\\; \\min(m,\\hat{m}).
+\\]
+
+
+\\textbf{Byte error count} measures how many byte positions differ in the comparable prefix, plus a penalty for missing or extra bytes:
+\\[
+E_{\\mathrm{byte}}
+\\;=\\;
+\\sum_{i=1}^{m_{\\min}}\\mathbf{1}[x_i\\neq \\hat{x}_i] \\;+\\; |m-\\hat{m}|.
+\\]
+
+
+\\textbf{Bit error count} measures the number of incorrect bits in the comparable prefix (using per-byte Hamming distance) and adds a bit penalty for missing or extra bytes:
+\\[
+E_{\\mathrm{bit}}
+\\;=\\;
+\\sum_{i=1}^{m_{\\min}}\\mathrm{hd}_8(x_i,\\hat{x}_i) \\;+\\; 8|m-\\hat{m}|,
+\\]
+where $\\mathrm{hd}_8(\\cdot,\\cdot)$ denotes Hamming distance between the 8-bit representations of two bytes.
+
+
+\\textbf{Bit error rate (BER)} normalizes the bit error count by the original bit length so runs of different sizes are comparable:
+\\[
+\\mathrm{BER} \\;=\\; \\frac{E_{\\mathrm{bit}}}{8m}.
+\\]
+Over a run set $\\mathcal{R}$, the mean BER is reported as:
+\\[
+\\overline{\\mathrm{BER}} \\;=\\; \\frac{1}{|\\mathcal{R}|}\\sum_{r\\in\\mathcal{R}} \\mathrm{BER}(r).
+\\]
+Optionally, a byte-level error rate can be reported as $\\mathrm{ByteER}=E_{\\mathrm{byte}}/m$.
+
+\\paragraph{Failure categorization.}
+Each run is assigned a \\textbf{failure label} to distinguish typical failure modes during analysis:
+
+    \\item \\textbf{success} if $\\hat{\\mathbf{x}}=\\mathbf{x}$;
+    \\item \\textbf{empty output} if $\\hat{m}=0$;
+    \\item \\textbf{outer-decoder failure} if the configured outer stage signals failure (e.g., RS decoding failure; fountain peeling stalls);
+    \\item \\textbf{source/codec failure} if the inverse source stage signals failure (e.g., invalid compressed representation);
+    \\item \\textbf{mismatch} otherwise (non-empty output with $\\hat{\\mathbf{x}}\\neq\\mathbf{x}$ and no explicit failure signal).
+
+
+
+The following metrics are computed from transmission counters recorded during encoding. Let $N_{\\mathrm{data}}$ be the number of source data units (data peptides for RS-protected configurations; source packets for fountain configurations) and $N_{\\mathrm{tx}}$ the total number of transmitted units (data plus parity peptides for RS; transmitted droplets for fountain). The \\textbf{redundancy ratio} is:
+\\[
+\\mathrm{RR} \\;=\\; \\frac{N_{\\mathrm{tx}}}{N_{\\mathrm{data}}}.
+\\]
+
+Let $R_{\\mathrm{tot}}$ denote the total number of transmitted amino-acid residues in the run (including parity units and index prefixes when present). The \\textbf{net information rate (bits per amino acid)} is:
+\\[
+\\mathrm{b/AA} \\;=\\; \\frac{8m}{R_{\\mathrm{tot}}}.
+\\]
+
+To express the residue-level transmission cost in absolute byte units, define the \\textbf{byte-equivalent transmitted size} assuming $|\\Sigma|=8$ (i.e., $3$ bits per residue):
+\\[
+s_{\\mathrm{enc}} \\;=\\; \\left\\lceil \\frac{3R_{\\mathrm{tot}}}{8} \\right\\rceil,
+\\]
+and the \\textbf{encoded-size overhead} relative to the original file size:
+\\[
+\\Delta_{\\mathrm{enc}} \\;=\\; s_{\\mathrm{enc}} - m.
+\\]
+
+Finally, let $C_{\\mathrm{tot}}$ be the total available payload capacity (in bits) across all transmitted peptides under the configured payload length, and let $b_{\\mathrm{use}}$ be the number of useful payload bits before tail alignment padding. The \\textbf{payload utilization} is:
+\\[
+\\mathrm{U} \\;=\\; \\frac{b_{\\mathrm{use}}}{C_{\\mathrm{tot}}}.
+\\]
+"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "results",
+      "title": "Results",
+      "start_page": 35,
+      "end_page": 42,
+      "content": "\\label{chap:results}
+Results are organized by scheme family to keep the interpretation aligned with
+the design choices in the pipeline.",
+      "sections": [
+        {
+          "id": "huffman_baseline",
+          "title": "Huffman baseline",
+          "content": "\\label{sec:res_huffman}
+
+The Huffman baseline serves as the reference configuration for end-to-end behavior under the shared peptide
+pipeline. The first goal is to determine an RS parity profile that yields a stable operating point. This section therefore separates a conservative \\emph{worst-case} sweep (uniform, sequence-agnostic errors) from the more
+realistic \\emph{score-driven} channel (sequence-aware errors), which is used for the main scheme comparisons.",
+          "subsections": [
+            {
+              "id": "worst_case_uniform_sweep_upper_bound_parity_requirement",
+              "title": "Worst-case uniform sweep: upper-bound parity requirement",
+              "content": "\\label{sec:res_huffman_uniform_sweep}
+
+The first sweep is executed under the \\emph{uniform, sequence-agnostic} channel parameterization
+(Section~\\ref{sec:method_error_overview}). The fixed probabilities are intentionally chosen on the high side to act
+as a conservative stress test: all peptides experience the same perturbation strength, independent of sequence
+content. The purpose is not to model realistic synthesis variability, but to determine an RS setting that remains
+stable under adverse conditions.
+
+Table~\\ref{tab:res_huffman_parity_summary} summarizes the sweep by aggregating per-run outcomes by ECC profile. Under
+this stress test, lower-parity profiles show substantial residual discrepancies and frequent failures for larger
+files, while increasing parity improves stability across the evaluated size range. In this setting, RS128 achieves
+perfect recovery across the sweep and serves as an \\emph{upper-bound} operating point for worst-case robustness.
+
+\\begin{table}[H]
+    \\centering
+    \\caption{Huffman baseline: summary of the RS parity sweep under the uniform (sequence-agnostic) channel (mean over file sizes up to 1~MB).}
+    \\label{tab:res_huffman_parity_summary}
+    \\begin{tabular}{lrrr}
+        \\toprule
+        \\textbf{ECC profile} & \\textbf{PRR} & \\textbf{Mean BER} & \\textbf{Mean $|\\Delta_m|$ (bytes)} \\\\
+        \\midrule
+        RS8   & 0.3333 & 0.533678 & 99435 \\\\
+        RS16  & 0.3810 & 0.534096 & 99508 \\\\
+        RS32  & 0.5238 & 0.387583 & 97745 \\\\
+        RS64  & 0.8095 & 0.068165 & 18564 \\\\
+        RS128 & 1.0000 & 0.000000 & 0 \\\\
+        \\bottomrule
+    \\end{tabular}
+\\end{table}
+
+Figure~\\ref{fig:res_huffman_rs128} isolates RS128 for the same sweep. Across the evaluated file-size range, the BER
+remains zero, consistent with the perfect recovery rate reported in Table~\\ref{tab:res_huffman_parity_summary}.
+This motivates using RS128 as a conservative reference point when interpreting later results.
+
+\\begin{figure}[H]
+    \\centering
+    % Suggested rename (avoid parentheses):
+    %   output(4).png -> huffman_uniform_rs128_ber.png
+    \\includegraphics[width=0.92\\linewidth]{Sources/rs128.png}
+    \\caption{Huffman baseline under the uniform (sequence-agnostic) channel: RS128 mean BER vs.\\ file size.}
+    \\label{fig:res_huffman_rs128}
+\\end{figure}
+"
+            },
+            {
+              "id": "score_driven_channel_reduced_parity_suffices",
+              "title": "Score-driven channel: reduced parity suffices",
+              "content": "\\label{sec:res_huffman_score_sweep}
+
+The main comparisons in the remainder of the thesis use the score-driven channel
+parameterization (Section~\\ref{sec:method_error_overview}). In this setting, peptides with higher predicted quality
+receive lower corruption rates, which reduces the effective error burden relative to the uniform stress test and
+better reflects heterogeneous synthesis difficulty.
+
+Figure~\\ref{fig:res_huffman_score_parity_sweep} shows the corresponding parity sweep under the score-driven channel.
+RS8 and RS16 still exhibit a strong size dependence, with a transition from low BER at small sizes to near-random
+outputs at larger sizes. RS32 improves robustness but remains unstable for large files. In contrast, RS64 exhibits
+zero BER across the evaluated size range in this sweep, indicating stable end-to-end recovery under the sequence-aware model.
+
+\\begin{figure}[H]
+    \\centering
+
+    \\begin{subfigure}[t]{0.48\\textwidth}
+        \\centering
+        \\includegraphics[width=\\linewidth]{Sources/rs8_score.png}
+        \\caption{RS8}
+    \\end{subfigure}\\hfill
+    \\begin{subfigure}[t]{0.48\\textwidth}
+        \\centering
+        \\includegraphics[width=\\linewidth]{Sources/rs16_score.png}
+        \\caption{RS16}
+    \\end{subfigure}
+
+    \\vspace{0.6em}
+
+    \\begin{subfigure}[t]{0.48\\textwidth}
+        \\centering
+        \\includegraphics[width=\\linewidth]{Sources/rs32_score.png}
+        \\caption{RS32}
+    \\end{subfigure}\\hfill
+    \\begin{subfigure}[t]{0.48\\textwidth}
+        \\centering
+        \\includegraphics[width=\\linewidth]{Sources/rs64_score.png}
+        \\caption{RS64}
+    \\end{subfigure}
+
+    \\caption{Huffman baseline under the score-driven channel: mean BER vs.\\ file size for multiple RS parity profiles.}
+    \\label{fig:res_huffman_score_parity_sweep}
+\\end{figure}
+
+To quantify this trade-off numerically, Table~\\ref{tab:res_huffman_score_based_summary} summarizes the same sweep by
+aggregating per-run outcomes by ECC profile.
+
+\\begin{table}[H]
+    \\centering
+    \\caption{Huffman baseline: score-driven channel summary.}
+    \\label{tab:res_huffman_score_based_summary}
+    \\begin{tabular}{lrrr}
+        \\toprule
+        \\textbf{ECC profile} & \\textbf{PRR} & \\textbf{Mean BER} & \\textbf{Mean $|\\Delta_m|$ (bytes)} \\\\
+        \\midrule
+        RS8   & 0.3810 & 0.481922 & 99141 \\\\
+        RS16  & 0.4762 & 0.330021 & 96641 \\\\
+        RS32  & 0.8095 & 0.113034 & 42619 \\\\
+        RS64  & 1.0000 & 0.000000 & 0 \\\\
+        \\bottomrule
+    \\end{tabular}
+\\end{table}
+
+
+\\paragraph{Selected configuration for subsequent comparisons}
+\\label{sec:res_huffman_selected}
+
+The uniform stress test indicates that RS128 is required as an upper-bound setting for worst-case robustness.
+However, under the score-driven channel used for the main evaluation, RS64 already achieves stable recovery across
+the tested file sizes while reducing transmitted redundancy relative to RS128. Therefore, RS64 is used as the
+default Huffman operating point for the subsequent cross-scheme comparisons under the score-driven model, while
+RS128 is retained as a conservative reference for worst-case interpretation.
+
+
+To make the overhead at the selected operating point explicit, Table~\\ref{tab:res_huffman_rs64_overhead} reports
+representative sizes and the corresponding transmitted-size overhead (in bytes) implied by the run-level counters.
+
+\\begin{table}[H]
+    \\centering
+    \\caption{Huffman baseline with RS64 (score-driven): representative overhead indicators.}
+    \\label{tab:res_huffman_rs64_overhead}
+    \\begin{tabular}{rrrrrr}
+        \\toprule
+        \\textbf{File size (bytes)} & \\textbf{$s_{\\mathrm{enc}}$ (bytes)} & \\textbf{$\\Delta_{\\mathrm{enc}}$ (bytes)} &
+        \\textbf{RR} & \\textbf{b/AA} & \\textbf{$U$} \\\\
+        \\midrule
+        1       & 439     & 438     & 65.00 & 0.007 & 0.148 \\\\
+        128     & 527     & 399     & 5.57  & 0.729 & 0.995 \\\\
+        1024    & 2957    & 1933    & 3.71  & 1.039 & 0.998 \\\\
+        16384   & 47426   & 31042   & 3.69  & 1.036 & 1.000 \\\\
+        262144  & 757263  & 495119  & 3.67  & 1.039 & 1.000 \\\\
+        1048576 & 3029400 & 1980824 & 3.67  & 1.038 & 1.000 \\\\
+        \\bottomrule
+    \\end{tabular}
+\\end{table}
+
+
+
+"
+            }
+          ]
+        },
+        {
+          "id": "yin_yang_constrained_mapping",
+          "title": "Yin-Yang constrained mapping",
+          "content": "\\label{sec:res_yinyang}
+
+\\label{sec:res_yinyang_rs64}
+
+The RS operating point is taken over from the Huffman baseline for two reasons. First, the outer RS layer is
+\\emph{mapping-agnostic} in the sense that it operates on the protected byte stream regardless of whether the inner
+stage is Huffman or Yin--Yang; hence selecting a stable RS profile for the score-driven channel yields a comparable
+redundancy setting across schemes. Second, under the score-driven channel the effective error burden depends on the
+sequence distribution, but RS64 already provides a strong baseline that decodes reliably across the full tested
+file-size range.
+
+Empirically, Yin--Yang with RS64 achieves perfect recovery across all evaluated file sizes
+($\\mathrm{PRR}=1.0000$ with mean $\\mathrm{BER}=0$ and mean $|\\Delta_m|=0$)
+
+To make the transmitted overhead of the RS64 operating point explicit, Table~\\ref{tab:res_yinyang_rs64_overhead}
+reports representative overhead indicators derived from the run-level transmission counters.
+
+\\begin{table}[H]
+    \\centering
+    \\caption{Yin--Yang mapping with RS64 (score-driven): representative overhead indicators.}
+    \\label{tab:res_yinyang_rs64_overhead}
+    \\begin{tabular}{rrrrrr}
+        \\toprule
+        \\textbf{File size (bytes)} &
+        \\textbf{$s_{\\mathrm{enc}}$ (bytes)} &
+        \\textbf{$\\Delta_{\\mathrm{enc}}$ (bytes)} &
+        \\textbf{RR} &
+        \\textbf{b/AA} &
+        \\textbf{$U$} \\\\
+        \\midrule
+        1       & 803     & 802     & 65.00 & 0.030 & 0.222 \\\\
+        128     & 1060    & 932     & 5.41  & 0.362 & 0.981 \\\\
+        1024    & 7734    & 6710    & 3.71  & 0.396 & 0.998 \\\\
+        16384   & 119400  & 103016  & 3.68  & 0.388 & 1.000 \\\\
+        262144  & 1899120 & 1636976 & 3.67  & 0.388 & 1.000 \\\\
+        1048576 & 4803290 & 3754714 & 3.67  & 0.388 & 1.000 \\\\
+        \\bottomrule
+    \\end{tabular}
+\\end{table}
+
+
+\\label{sec:res_yinyang_rs32}
+
+To characterize how Yin--Yang behaves with a reduced parity budget, the same file-size sweep is repeated at RS32.
+Across the evaluated sizes, Yin--Yang attains $\\mathrm{PRR}=0.9524$ (20/21 successful runs), with essentially
+vanishing residual discrepancy (mean BER $1.0\\times 10^{-7}$ and mean $|\\Delta_m|=0$). The single failure occurs at
+the largest file size (1~MB) and manifests as a small mismatch rather than a full breakdown into a near-random
+output.
+
+These results are consistent with the intended effect of the constrained mapping: by avoiding unfavorable residue
+patterns, the encoder shifts the generated sequence distribution toward higher predicted scores and lower induced
+base-error rates, reducing the effective error burden under the score-driven channel at a fixed parity budget.
+"
+        },
+        {
+          "id": "huffman_vs_yin_yang_at_matched_rs_budgets",
+          "title": "Huffman vs. Yin-Yang at matched RS budgets",
+          "content": "\\label{sec:res_compare_huffman_yinyang}
+
+To isolate the effect of the inner mapping, Huffman and Yin--Yang are compared at the same RS profiles under the
+score-driven channel. At RS64 both schemes achieve perfect recovery, so RS64 mainly reflects efficiency at a
+saturated reliability point. RS32 is more discriminative because the system operates closer to the decoding
+threshold, where mapping choices affect how the score-driven channel corrupts the generated peptides.
+
+\\begin{table}[H]
+    \\centering
+    \\caption{Huffman vs.\\ Yin--Yang under the score-driven channel at RS64.}
+    \\label{tab:res_compare_rs64}
+    \\begin{tabular}{lrrrrrr}
+        \\toprule
+        \\textbf{Scheme} & \\textbf{PRR} & \\textbf{Mean BER} & \\textbf{Mean $|\\Delta_m|$} &
+        \\textbf{$\\Delta_{\\mathrm{enc}}$ @ 1MB} & \\textbf{RR @ 1MB} & \\textbf{b/AA @ 1MB} \\\\
+        \\midrule
+        Huffman  & 1.0000 & 0 & 0 & 1 980 824 & 3.667 & 1.038 \\\\
+        Yin--Yang & 1.0000 & 0 & 0 & 3 754 714 & 3.667 & 0.388 \\\\
+        \\bottomrule
+    \\end{tabular}
+\\end{table}
+
+At RS64, both mappings saturate at $\\mathrm{PRR}=1$, so recovery metrics no longer distinguish them. The remaining
+difference is efficiency: in this implementation, Yin--Yang incurs a larger transmitted-size overhead and a lower
+net information rate (b/AA), i.e., it spends more residues per recovered payload bit at the same RS profile.
+
+\\begin{table}[H]
+    \\centering
+    \\caption{Huffman vs.\\ Yin--Yang under the score-driven channel at RS32.}
+    \\label{tab:res_compare_rs32}
+    \\begin{tabular}{lrrrrrr}
+        \\toprule
+        \\textbf{Scheme} & \\textbf{PRR} & \\textbf{Mean BER} & \\textbf{Mean $|\\Delta_m|$} &
+        \\textbf{$\\Delta_{\\mathrm{enc}}$ @ 1MB} & \\textbf{RR @ 1MB} & \\textbf{b/AA @ 1MB} \\\\
+        \\midrule
+        Huffman  & 0.8095 & 0.113034 & 42 619 & 879 224  & 2.333 & 1.632 \\\\
+        Yin--Yang & 0.9524 & $1.02\\times 10^{-7}$ & 0 & 2 621 649 & 2.333 & 0.857 \\\\
+        \\bottomrule
+    \\end{tabular}
+\\end{table}
+
+At RS32, the mappings separate clearly: Yin--Yang maintains substantially higher recovery (PRR) with essentially
+zero residual BER and no length deviation on average, whereas Huffman shows more frequent failures and higher
+residual discrepancy. This is the regime where the score-driven channel makes the inner mapping
+relevant: constraint-based mapping can shift the encoded sequence distribution toward higher predicted quality,
+reducing the effective error burden at the same parity budget. In exchange, Yin--Yang shows higher transmitted
+overhead and lower b/AA in the current codec implementation.
+"
+        },
+        {
+          "id": "fountain_coding",
+          "title": "Fountain coding",
+          "content": "\\label{sec:res_fountain}
+
+In addition to RS-based outer protection, the pipeline includes a fountain-style configuration with per-droplet
+integrity filtering (CRC) and peeling decoding. Because droplets that fail the CRC are discarded before solving,
+the effective error profile seen by the fountain decoder differs qualitatively from the RS setting. For this
+reason, fountain results are reported as a feasibility and scaling study, and redundancy is analyzed along the
+droplet-overhead axis rather than via an RS parity profile.
+
+
+Fountain redundancy is parameterized by an overhead factor \\(\\rho\\), where the encoder targets
+\\((1+\\rho) k\\) transmitted droplets for \\(k\\) source symbols. In the implementation and run logs, a profile
+\\texttt{FNTXX} encodes \\(\\rho = \\texttt{XX}/10\\). For example, \\texttt{FNT50} corresponds to \\(\\rho=5.0\\)
+(i.e., \\(\\approx 6k\\) transmitted droplets).
+
+
+Unlike the RS comparison runs, fountain evaluation is performed only under the uniform channel setting
+(Section~\\ref{sec:method_error_model}), because the present fountain pipeline converts many corruptions into
+droplet erasures via CRC filtering and does not expose a score-driven per-peptide parameterization that is
+directly comparable to the RS runs. The uniform channel probabilities are:
+\\[
+p_{\\mathrm{loss}} = 0.01,
+\\qquad
+p_{\\mathrm{mut}} = p_{\\mathrm{ins}} = p_{\\mathrm{shuf}} = 0.005.
+\\]
+To identify a conservative operating point (analogous to the Huffman upper-bound sweep), a redundancy sweep is
+performed over \\(\\rho \\in \\{1.0,2.0,3.0,5.0\\}\\) (profiles \\texttt{FNT10}, \\texttt{FNT20}, \\texttt{FNT30},
+\\texttt{FNT50}) across the full file-size sweep up to 1~MB.
+
+\\begin{table}[H]
+    \\centering
+    \\caption{Fountain redundancy sweep (uniform channel): aggregated recovery metrics over the full file-size sweep (up to 1~MB).}
+    \\label{tab:res_fountain_sweep_summary}
+    \\begin{tabular}{lrrrr}
+        \\toprule
+        \\textbf{Profile} & \\(\\boldsymbol{\\rho}\\) & \\textbf{PRR} & \\textbf{Mean BER} & \\textbf{Failures (file sizes)} \\\\
+        \\midrule
+        FNT10 & 1.0 & 0.2857 & 0.714286 & \\(\\ge 64\\) B \\\\
+        FNT20 & 2.0 & 0.3810 & 0.619048 & \\(\\ge 256\\) B \\\\
+        FNT30 & 3.0 & 0.9048 & 0.095238 & 512 B, 1 024 B \\\\
+        FNT50 & 5.0 & 1.0000 & 0.000000 & -- \\\\
+        \\bottomrule
+    \\end{tabular}
+\\end{table}
+
+
+Over the full sweep, \\texttt{FNT50} (\\(\\rho=5.0\\)) is the smallest evaluated profile that achieves perfect recovery
+(PRR\\(=1\\)) for all tested file sizes. \\texttt{FNT30} (\\(\\rho=3.0\\)) is already sufficient for the large-file regime,
+but exhibits failures at intermediate small sizes (512 and 1,024 bytes) under the enforced minimum-droplet
+constraints and the resulting peeling dynamics. Therefore, \\texttt{FNT50} is used as a conservative reference
+setting for reporting overhead and scaling indicators below.
+
+
+Table~\\ref{tab:res_fountain_overhead_fnt50} reports representative operating points derived from transmission
+counters. For very small files, a minimum droplet budget dominates and yields disproportionately high overhead; for
+larger files, the redundancy ratio approaches the intended value implied by \\(\\rho\\) (i.e., \\(1+\\rho = 6\\)).
+
+\\begin{table}[H]
+    \\centering
+    \\caption{Fountain configuration (\\texttt{FNT50}, \\(\\rho=5.0\\)): representative overhead and runtime indicators.}
+    \\label{tab:res_fountain_overhead_fnt50}
+    \\begin{tabular}{rrrrrrr}
+        \\toprule
+        \\textbf{File size (bytes)} &
+        \\textbf{\\(s_{\\mathrm{enc}}\\) (bytes)} &
+        \\textbf{\\(\\Delta_{\\mathrm{enc}}\\) (bytes)} &
+        \\textbf{RR} &
+        \\textbf{b/AA} &
+        \\textbf{\\(U\\)} &
+        \\textbf{Total time (s)} \\\\
+        \\midrule
+        1         & 1 296      & 1 295      & 48.00 & 0.002315 & 0.000772 & 0.018 \\\\
+        128       & 1 296      & 1 168      & 6.00  & 0.296296 & 0.098765 & 0.002 \\\\
+        1 024    & 9 882      & 8 858      & 6.00  & 0.310868 & 0.103623 & 0.014 \\\\
+        16 384   & 156 168    & 139 784    & 6.00  & 0.314738 & 0.104913 & 0.268 \\\\
+        262 144  & 2 498 202  & 2 236 058  & 6.00  & 0.314799 & 0.104933 & 8.452 \\\\
+        1 048 576 & 9 992 322 & 8 943 746 & 6.00 & 0.314815 & 0.104938 & 35.776 \\\\
+        \\bottomrule
+    \\end{tabular}
+\\end{table}
+
+\\paragraph{Scaling behavior.}
+While \\texttt{FNT50} reaches PRR\\(=1\\) under this uniform setting, runtime increases steeply with file size, with
+peeling/solving dominating at the largest instances.
+
+\\begin{figure}[H]
+    \\centering
+    \\begin{subfigure}[t]{0.48\\textwidth}
+        \\centering
+        \\includegraphics[width=\\linewidth]{Sources/fountain50_runtime.png}
+        \\caption{Total runtime vs.\\ file size (log scales).}
+    \\end{subfigure}\\hfill
+    \\begin{subfigure}[t]{0.48\\textwidth}
+        \\centering
+        \\includegraphics[width=\\linewidth]{Sources/fountain50_overhead.png}
+        \\caption{Encoded-size overhead vs.\\ file size (log scales).}
+    \\end{subfigure}
+    \\caption{Fountain configuration (\\texttt{FNT50}, \\(\\rho=5.0\\)): scaling behavior across the file-size sweep.}
+    \\label{fig:res_fountain_scaling}
+\\end{figure}
+
+A direct comparison to the RS results in Sections~\\ref{sec:res_huffman}--\\ref{sec:res_compare_huffman_yinyang}
+requires matching the comparison axis. In particular, fountain decoding converts many corruptions into erasures via
+CRC filtering, and performance is primarily controlled by droplet overhead rather than parity count. A fair
+head-to-head would therefore evaluate PRR as a function of transmitted overhead (\\(\\Delta_{\\mathrm{enc}}\\), RR, or
+b/AA) under matched channel assumptions.
+
+
+
+"
+        }
+      ]
+    },
+    {
+      "id": "discussion",
+      "title": "Discussion",
+      "start_page": 43,
+      "end_page": 46,
+      "content": "This chapter interprets the empirical findings of Chapter~\\ref{chap:results} with respect to the research question
+introduced in Section~\\ref{sec:method_objective_scope} and the intended scope set in the Introduction. The
+discussion emphasizes (i) transferability of DNA-oriented coding ideas to peptide sequences under minimal
+adaptation, (ii) the role of the adopted channel model in determining which design choices matter, and (iii) the
+practical trade-offs between reliability, redundancy, and efficiency that emerge within the implemented pipeline.
+
+",
+      "sections": [
+        {
+          "id": "interpretation_of_results_and_answer_to_thBitstreame_research_question",
+          "title": "Interpretation of results and answer to the research question",
+          "content": "The research question asks whether coding schemes originally developed for DNA-based molecular storage can be
+applied to peptides without \\emph{fundamental changes}, where fundamental changes refer to redesigning the core
+algorithmic logic rather than adapting alphabet mapping, framing, constraint handling, or parameters. Within the
+implemented pipeline and the reported experiments, the empirical answer is twofold.
+
+First, \\textbf{transferability holds at the level of core principles}. A Huffman-based baseline, a Yin--Yang-style
+constrained mapping, and an LT fountain construction can all be instantiated over fixed-length peptide sequences
+using only minimal adaptations (alphabet restriction and mapping, fixed peptide framing, and parameter tuning),
+while preserving the conceptual logic of each scheme family. In this sense, the study supports the claim that
+DNA-oriented coding ideas can be carried over to peptides without re-engineering their central mechanisms.
+
+Second, \\textbf{peptide-specific considerations become necessary for meaningful comparisons}. The results show that
+the impact of inner mapping choices depends critically on how the peptide channel is modeled. Under a
+sequence-agnostic channel, constrained mapping has no mechanism to reduce corruption, so performance is dominated
+by the outer-code budget. Under a sequence-aware channel, constrained mapping can matter because it can steer the
+sequence distribution toward higher predicted quality and thereby reduce the effective corruption burden seen by
+the outer decoder. Consequently, while transfer is feasible, claims of mapping-driven improvement are only
+meaningful under an error model that reflects peptide-specific sequence dependence.
+
+This dependency is already visible from the Huffman baseline parity sweeps. The uniform stress test
+(Table~\\ref{tab:res_huffman_parity_summary}) is evaluated over multiple independent channel realizations to obtain a
+conservative reference point. It establishes an upper bound on parity requirements under sequence-agnostic errors:
+increasing RS parity improves stability, and RS128 reaches perfect recovery across the sweep (PRR \\(=1\\)). This
+reference is useful because it is independent of any sequence-aware effects; it primarily reflects the interaction
+between residue-level perturbations, fixed framing, and block-based outer decoding.
+
+Under the score-driven channel, the baseline additionally identifies a stable operating point for cross-scheme
+comparisons within the same channel setting. Table~\\ref{tab:res_huffman_score_based_summary} and
+Figure~\\ref{fig:res_huffman_score_parity_sweep} show that RS64 already achieves perfect recovery across file sizes
+up to 1~MB, motivating RS64 as the default operating point for the main comparisons. Importantly, this illustrates
+the central modeling implication: once the channel assigns lower error rates to high-quality peptides,
+substantially less parity is required than under the uniform stress test.
+
+At this selected operating point, Huffman also establishes an efficiency reference. At RS64, Huffman attains a
+comparatively high net information rate (Table~\\ref{tab:res_huffman_rs64_overhead}) because it uses the full 3-bit
+residue mapping at the payload layer and does not reduce the payload rate to gain additional degrees of freedom.
+This becomes the baseline for interpreting constrained mappings that explicitly trade rate for sequence selection.
+
+The Yin--Yang configuration introduces such selection freedom by mapping each 2-bit payload symbol to a pair of
+residues and choosing the emitted residue to avoid undesirable local patterns. Crucially, this does not change the
+outer-code structure: RS acts on the serialized stream regardless of the inner mapping. Therefore, the empirical
+advantage of Yin--Yang is expected to appear primarily near the decoding threshold, where a reduction in effective
+corruption can change whether the outer decoder succeeds.
+
+The results support this interpretation. At RS32, Table~\\ref{tab:res_compare_rs32} shows a clear separation:
+Yin--Yang achieves higher PRR than Huffman with essentially vanishing residual discrepancy, whereas Huffman exhibits
+more failures and non-zero BER. This is precisely the regime in which a \\emph{sequence-aware} channel makes inner
+mapping relevant: if the channel penalizes low-quality sequences, then a constrained mapper can reduce the
+effective corruption burden by shifting outputs toward higher predicted quality. At RS64, however, both mappings
+reach PRR \\(=1\\) (Table~\\ref{tab:res_compare_rs64}), so reliability no longer discriminates designs; the remaining
+difference is efficiency. Because Yin--Yang carries only 2 bits per payload residue, it incurs a lower net rate and
+higher transmitted-size overhead than the 3-bit Huffman baseline, as reflected by the b/AA and
+\\(\\Delta_{\\mathrm{enc}}\\) indicators in Table~\\ref{tab:res_compare_rs64}. Overall, Yin--Yang is not a universal win:
+it can improve robustness at reduced RS budgets under a sequence-aware channel, but it trades off payload
+efficiency.
+
+Finally, the fountain configuration should be interpreted as operating in a different regime than RS parity sweeps.
+RS redundancy is controlled by a parity count per block, while fountain redundancy is controlled by transmitted
+overhead \\(\\rho\\) (droplets per source symbol). Moreover, integrity filtering discards invalid droplets before
+decoding, converting corruption into erasures at the droplet level and altering the effective error profile seen by
+the solver relative to the RS pipeline. Under the feasibility setting used in Chapter~\\ref{chap:results}, the
+fountain configuration achieves perfect recovery at \\(\\rho=5.0\\) in the tested uniform error regime and reveals
+a practical bottleneck: runtime grows steeply with file size (Figure~\\ref{fig:res_fountain_scaling}). Therefore, the
+fountain results are best interpreted as feasibility plus scaling behavior in the current implementation, rather
+than as a direct head-to-head winner/loser statement against RS profiles.
+
+
+"
+        },
+        {
+          "id": "limitations_and_practical_implications",
+          "title": "Limitations and practical implications",
+          "content": "\\label{sec:disc_limits_implications}
+
+The conclusions above are conditioned on the evaluation scope and several simplifying assumptions that influence
+interpretation.
+
+
+First, the evaluation restricts the alphabet to \\(|\\Sigma|=8\\) and uses fixed peptide framing to maintain a clean
+3-bit mapping and comparable interfaces across schemes. The experiments therefore assess transferability under a
+controlled alphabet restriction rather than the maximum achievable payload density with larger peptide alphabets.
+Second, channel modeling is decisive: under a sequence-agnostic channel, constrained mapping cannot influence
+corruption; under a score-driven channel, it can. Hence, claims about the benefit of constrained mapping are
+inherently tied to the adopted sequence-aware parameterization. Third, beyond the uniform stress test (which uses
+multiple independent channel draws to obtain a conservative upper-bound reference), the remaining file--configuration
+points are reported as point estimates under one channel realization. Replicating these points would primarily add
+confidence intervals for PRR/BER under the score-driven model rather than change the evaluation protocol. In
+addition, decoding assumes that structural metadata is available externally and is not embedded into the peptide
+payloads. Finally, the study is computational and does not include wet-lab validation; absolute performance levels
+should not be interpreted as laboratory guarantees, while comparative statements are valid only under the stated
+model.
+
+Despite these limitations, the results suggest clear design guidance within the implemented setup. If the goal is
+\\textbf{high payload efficiency} at a reliable operating point, the Huffman baseline with a stable RS profile (e.g.,
+RS64 under the score-driven channel) provides high b/AA and lower transmitted overhead at large file sizes
+(Table~\\ref{tab:res_huffman_rs64_overhead}). If the goal is \\textbf{robustness at reduced RS budgets} under a
+sequence-aware channel, constrained mapping can improve PRR near the decoding threshold (e.g., at RS32) but at the
+cost of a lower net information rate (Table~\\ref{tab:res_compare_rs32}). If the goal is \\textbf{rateless operation},
+fountain coding is feasible in the pipeline, but runtime scaling becomes a primary constraint at large file sizes in
+the current implementation (Figure~\\ref{fig:res_fountain_scaling}), and comparisons should be made along matched
+transmitted-overhead axes rather than parity profiles.
+
+
+"
+        }
+      ]
+    },
+    {
+      "id": "conclusion_and_outlook",
+      "title": "Conclusion and Outlook",
+      "start_page": 47,
+      "end_page": 50,
+      "content": "This thesis examined whether coding strategies developed for DNA-based molecular storage can be applied to
+peptide-based storage within a unified software evaluation pipeline. The pipeline encodes files into fixed-length
+peptide sequences over a restricted alphabet, applies a residue-level stochastic channel, and decodes perturbed
+outputs using either a block-based Reed--Solomon (RS) outer code or a fountain-style peeling decoder. Performance
+is reported using perfect recovery rate (PRR) together with transmitted overhead and efficiency indicators.",
+      "sections": [
+        {
+          "id": "conclusion",
+          "title": "Conclusion",
+          "content": "\\label{sec:conclusion_summary}
+
+The main conclusions are:
+
+
+    \\item \\textbf{DNA-oriented scheme families transfer to a peptide setting without redesign.}
+    Huffman source coding, Yin--Yang-style constrained mapping, and LT fountain coding can be instantiated over
+    peptide sequences while preserving their core mechanisms. The required adaptations are limited to alphabet
+    mapping, fixed framing, and parameter selection.
+
+    \\item \\textbf{RS parity yields a robust, mapping-agnostic reliability backbone.}
+    In the uniform stress test evaluated over multiple independent channel draws, increasing parity improves
+    stability and RS128 serves as a conservative upper-bound setting. Under the score-driven channel used for the
+    main comparisons, RS64 already achieves stable recovery across file sizes up to 1~MB.
+
+    \\item \\textbf{Constrained mapping improves robustness near the RS threshold in a sequence-aware channel.}
+    At RS32, Yin--Yang achieves higher PRR than the Huffman baseline with essentially vanishing residual
+    discrepancy. At RS64, both mappings saturate at perfect recovery, and the remaining difference is efficiency.
+
+    \\item \\textbf{The main cost of constrained mapping is efficiency.}
+    Because the implemented Yin--Yang payload mapping operates at 2 bits per payload residue, it attains a lower
+    net information rate and higher transmitted overhead than the 3-bit baseline at comparable reliability.
+
+
+    \\item \\textbf{Fountain coding is feasible but operates in a different redundancy regime.}
+Under the uniform channel, a redundancy sweep indicates that \\texttt{FNT50} (\\(\\rho=5.0\\)) is the smallest tested
+setting that achieves PRR\\(=1\\) across the full file-size sweep up to 1~MB, while lower overhead factors fail for
+parts of the sweep. Although recovery can be made reliable by increasing droplet overhead and using CRC-based
+filtering (converting many corruptions into erasures), runtime grows steeply with file size in the current
+implementation. Comparisons to RS-based results should therefore be made along a transmitted-overhead axis (RR,
+\\(\\Delta_{\\mathrm{enc}}\\), b/AA) rather than parity profiles.
+
+
+
+"
+        },
+        {
+          "id": "outlook",
+          "title": "Outlook",
+          "content": "\\label{sec:conclusion_outlook}
+
+Several extensions would strengthen the findings and improve realism:
+
+
+    \\item \\textbf{Extending repeated-draw evaluation beyond the stress test.}
+    While multiple independent channel draws are already used for the uniform stress test to establish a
+    conservative upper-bound RS setting, replicating the remaining configurations would provide confidence
+    intervals for PRR/BER under the score-driven model and quantify variability around the reported point
+    estimates.
+
+    \\item \\textbf{Metadata embedding.}
+    Embed essential structural metadata (padding, block structure, indexing) into the peptide payload to remove the
+    external-metadata assumption and quantify the resulting overhead.
+
+    \\item \\textbf{Larger alphabets and hybrid mappings.}
+    Evaluate expanded peptide alphabets (beyond \\(|\\Sigma|=8\\)) and mixed mappings that exploit peptide chemistry
+    while maintaining robust decoding interfaces.
+
+    \\item \\textbf{Matched-overhead RS vs.\\ fountain evaluation.}
+    Re-run fountain under the same channel parameterization as the RS experiments and report PRR as a function of
+    transmitted overhead (RR, \\(\\Delta_{\\mathrm{enc}}\\), b/AA) to enable head-to-head comparisons.
+
+    \\item \\textbf{Closer-to-lab channel models.}
+    Incorporate peptide-specific effects such as sequence-dependent hotspots, readout ambiguity, and multi-read
+    consensus to better approximate mass-spectrometry workflows.
+
+"
+        }
+      ]
+    },
+    {
+      "id": "bibliography",
+      "title": "Bibliography",
+      "start_page": 51,
+      "end_page": null,
+      "landingpg_content": "<a href='/app?item=bibliography'>Test </a>",
+      "content": "% Encoding: UTF-8
+
+
+@Misc{Reinsel2018,
+  author    = {David Reinsel and John Gantz and John Rydning},
+  title     = {The Digitization of the World: From Edge to Core.},
+  howpublished = {White Paper},
+  year      = {2018},
+  note      = {International Data Corporation (IDC), Sponsored by Seagate},
+  url       = {https://www.seagate.com/files/www-content/our-story/trends/files/idc-seagate-dataage-whitepaper.pdf}
+}
+
+@article{Doricchi2022,
+author = {Doricchi, Andrea and Platnich, Casey M. and Gimpel, Andreas and Horn, Friederikee and Earle, Max and Lanzavecchia, German and Cortajarena, Aitziber L. and Liz-Marzán, Luis M. and Liu, Na and Heckel, Reinhard and Grass, Robert N. and Krahne, Roman and Keyser, Ulrich F. and Garoli, Denis},
+title = {Emerging Approaches to DNA Data Storage: Challenges and Prospects.},
+journal = {ACS Nano},
+volume = {16},
+number = {11},
+pages = {17552-17571},
+year = {2022},
+doi = {10.1021/acsnano.2c06748},
+    note ={PMID: 36256971},
+
+URL = { 
+    
+        https://doi.org/10.1021/acsnano.2c06748
+    
+    
+
+},
+eprint = { 
+    
+        https://doi.org/10.1021/acsnano.2c06748
+    
+    
+
+}
+
+}
+
+@article{Grass2015,
+  author  = {Grass, Robert N. and Heckel, Reinhard and Puddu, Michele and Paunescu, Dragos and Stark, Wendelin J.},
+  title   = {Robust chemical preservation of digital information on {DNA} in silica with error-correcting codes},
+  journal = {Angewandte Chemie International Edition},
+  year    = {2015},
+  volume  = {54},
+  number  = {8},
+  pages   = {2552--2555},
+  doi     = {10.1002/anie.201411378},
+  note    = {PMID: 25650567},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/25650567/},
+  eprint  = {https://doi.org/10.1002/anie.201411378}
+}
+
+@article{Buko2023,
+  author  = {Buko, Tomasz and Tuczko, Nella and Ishikawa, Takao},
+  title   = {{DNA} Data Storage},
+  journal = {BioTech},
+  year    = {2023},
+  volume  = {12},
+  number  = {2},
+  pages   = {44},
+  doi     = {10.3390/biotech12020044},
+  note    = {PMID: 37366792; PMCID: PMC10296570},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/37366792/},
+  eprint  = {https://doi.org/10.3390/biotech12020044}
+}
+@article{Wang2024,
+  author  = {Wang, Shaopeng and Mao, Xiuhai and Wang, Fei and Zuo, Xiaolei and Fan, Chunhai},
+  title   = {Data Storage Using {DNA}},
+  journal = {Advanced Materials},
+  year    = {2024},
+  volume  = {36},
+  number  = {6},
+  pages   = {e2307499},
+  doi     = {10.1002/adma.202307499},
+  note    = {PMID: 37800877},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/37800877/},
+  eprint  = {https://doi.org/10.1002/adma.202307499}
+}
+
+
+@article{Imburgia2025,
+  author  = {Imburgia, Carina and Organick, Lee and Zhang, Karen and Cardozo, Nicolas and McBride, Jeff and Bee, Callista and Wilde, Delaney and Roote, Gwendolin and Jorgensen, Sophia and Ward, David and Anderson, Charlie and Strauss, Karin and Ceze, Luis and Nivala, Jeff},
+  title   = {Random access and semantic search in {DNA} data storage enabled by {Cas9} and machine-guided design},
+  journal = {Nature Communications},
+  year    = {2025},
+  volume  = {16},
+  number  = {1},
+  pages   = {6388},
+  doi     = {10.1038/s41467-025-61264-5},
+  note    = {PMID: 40640156; PMCID: PMC12246221},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/40640156/},
+  eprint  = {https://doi.org/10.1038/s41467-025-61264-5}
+}
+
+
+@article{Dong2020,
+  author  = {Dong, Yiming and Sun, Fajia and Ping, Zhi and Ouyang, Qi and Qian, Long},
+  title   = {{DNA} storage: research landscape and future prospects},
+  journal = {National Science Review},
+  year    = {2020},
+  volume  = {7},
+  number  = {6},
+  pages   = {1092--1107},
+  doi     = {10.1093/nsr/nwaa007},
+  note    = {PMID: 34692128; PMCID: PMC8288837},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/34692128/},
+  eprint  = {https://doi.org/10.1093/nsr/nwaa007}
+}
+
+
+@article{Jo2024,
+  author  = {Jo, Seokwoo and Shin, Haewon and Joe, Sung-Yune and Baek, David and Park, Chaewon and Chun, Honggu},
+  title   = {Recent progress in {DNA} data storage based on high-throughput {DNA} synthesis},
+  journal = {Biomedical Engineering Letters},
+  year    = {2024},
+  volume  = {14},
+  number  = {5},
+  pages   = {993--1009},
+  doi     = {10.1007/s13534-024-00386-z},
+  note    = {PMID: 39220021; PMCID: PMC11362454},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/39220021/},
+  eprint  = {https://doi.org/10.1007/s13534-024-00386-z}
+}
+
+
+
+@Misc{Ng2021,
+  author       = {Cheuk Chi A. Ng and Wai Man Tam and Haidi Yin and Qian Wu and Pui-Kin So and Melody Yee-Man Wong and Francis C. M. Lau and Zhong-Ping Yao},
+  title        = {Data storage using peptide sequences.},
+  howpublished = {Journal Article},
+  year         = {2021},
+  note         = {Nature Communications, 12:4242},
+  url          = {https://doi.org/10.1038/s41467-021-24496-9}
+}
+
+
+
+
+
+
+
+@Misc{Akash2024,
+  author       = {Aman Akash and Elena Bencurova and Thomas Dandekar},
+  title        = {How to make DNA data storage more applicable.},
+  howpublished = {Review Article},
+  year         = {2024},
+  note         = {Trends in Biotechnology, Volume 42, Issue 1},
+  url          = {https://doi.org/10.1016/j.tibtech.2023.07.006}
+}
+@Misc{Wang2022,
+  author       = {Chenyang Wang and Guannan Ma and Di Wei and Xinru Zhang and Peihan Wang and Cuidan Li and Jing Xing and Zheng Wei and Bo Duan and Dongxin Yang and Pei Wang and Dongbo Bu and Fei Chen},
+  title        = {Mainstream encoding–decoding methods of DNA data storage},
+  howpublished = {Review Article},
+  year         = {2022},
+  note         = {CCF Transactions on High Performance Computing, Volume 4, Pages 23--33},
+  url          = {https://doi.org/10.1007/s42514-022-00094-z}
+}
+@article{Press2020,
+  author  = {Press, William H. and Hawkins, John A. and Jones, Stephen K. Jr and Schaub, Jeffrey M. and Finkelstein, Ilya J.},
+  title   = {{HEDGES} error-correcting code for {DNA} storage corrects indels and allows sequence constraints},
+  journal = {Proceedings of the National Academy of Sciences of the United States of America},
+  year    = {2020},
+  volume  = {117},
+  number  = {31},
+  pages   = {18489--18496},
+  doi     = {10.1073/pnas.2004821117},
+  note    = {PMID: 32675237; PMCID: PMC7414044},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/32675237/},
+  eprint  = {https://doi.org/10.1073/pnas.2004821117}
+}
+
+@Misc{Zhu2023,
+  author       = {Chenyang Zhu and Zixin Xiao and Zihan Li and Yajun Zhao and Yue Zhang and Qi Liu and Chang Liu and Xuegong Zhang and Bo Yang and Hao Yin},
+  title        = {Towards practical and robust DNA-based data archiving using the yin–yang codec system},
+  howpublished = {Research Article},
+  year         = {2023},
+  note         = {Nature Communications, Volume 14, Article number: 470},
+  url          = {https://pmc.ncbi.nlm.nih.gov/articles/PMC10766522/}
+}
+@article{Yazdi2015,
+  author  = {Tabatabaei Yazdi, S. M. Hossein and Yuan, Yongbo and Ma, Jian and Zhao, Huimin and Milenkovic, Olgica},
+  title   = {A Rewritable, Random-Access {DNA}-Based Storage System},
+  journal = {Scientific Reports},
+  year    = {2015},
+  volume  = {5},
+  pages   = {14138},
+  doi     = {10.1038/srep14138},
+  url     = {https://www.nature.com/articles/srep14138},
+  note    = {Received 05 May 2015; Accepted 17 August 2015; Published 18 September 2015}
+}
+
+
+@article{Organick2018,
+  author  = {Organick, Lee and Ang, Siena Dumas and Chen, Yuan-Jyue and Lopez, Randolph and Yekhanin, Sergey and Makarychev, Konstantin and Racz, Miklos Z. and Kamath, Govinda and Gopalan, Parikshit and Nguyen, Bichlien and Takahashi, Christopher N. and Newman, Sharon and Parker, Hsing-Yeh and Rashtchian, Cyrus and Stewart, Kendall and Gupta, Gagan and Carlson, Robert and Mulligan, John and Carmean, Douglas and Seelig, Georg and Ceze, Luis and Strauss, Karin},
+  title   = {Random access in large-scale {DNA} data storage},
+  journal = {Nature Biotechnology},
+  year    = {2018},
+  volume  = {36},
+  number  = {3},
+  pages   = {242--248},
+  doi     = {10.1038/nbt.4079},
+  note    = {PMID: 29457795},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/29457795/},
+  eprint  = {https://doi.org/10.1038/nbt.4079}
+}
+
+
+@article{Xu2021,
+  author  = {Xu, Chengtao and Zhao, Chao and Ma, Biao and Liu, Hong},
+  title   = {Uncertainties in synthetic {DNA}-based data storage},
+  journal = {Nucleic Acids Research},
+  year    = {2021},
+  volume  = {49},
+  number  = {10},
+  pages   = {5451--5469},
+  doi     = {10.1093/nar/gkab230},
+  note    = {PMID: 33836076; PMCID: PMC8191772},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/33836076/},
+  eprint  = {https://doi.org/10.1093/nar/gkab230}
+}
+
+@article{Yeom2023,
+  author  = {Yeom, Huiran and Kim, Namphil and Lee, Amos Chungwon and Kim, Jinhyun and Kim, Hamin and Choi, Hansol and Song, Seo Woo and Kwon, Sunghoon and Choi, Yeongjae},
+  title   = {Highly Accurate Sequence- and Position-Independent Error Profiling of {DNA} Synthesis and Sequencing},
+  journal = {ACS Synthetic Biology},
+  year    = {2023},
+  volume  = {12},
+  number  = {12},
+  pages   = {3567--3577},
+  doi     = {10.1021/acssynbio.3c00308},
+  note    = {PMID: 37961855; PMCID: PMC10729760},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/37961855/},
+  eprint  = {https://doi.org/10.1021/acssynbio.3c00308}
+}
+
+@article{Erlich2017,
+  author  = {Erlich, Yaniv and Zielinski, Dina},
+  title   = {{DNA} {Fountain} enables a robust and efficient storage architecture},
+  journal = {Science},
+  year    = {2017},
+  volume  = {355},
+  number  = {6328},
+  pages   = {950--954},
+  doi     = {10.1126/science.aaj2038},
+  note    = {PMID: 28254941},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/28254941/},
+  eprint  = {https://doi.org/10.1126/science.aaj2038}
+}
+
+@article{Ping2022,
+  author  = {Ping, Zhi and Chen, Shihong and Zhou, Guangyu and Huang, Xiaoluo and Zhu, Sha Joe and Zhang, Haoling and Lee, Henry H and Lan, Zhaojun and Cui, Jie and Chen, Tai and Zhang, Wenwei and Yang, Huanming and Xu, Xun and Church, George M and Shen, Yue},
+  title   = {Towards practical and robust {DNA}-based data archiving using the yin--yang codec system},
+  journal = {Nature Computational Science},
+  year    = {2022},
+  volume  = {2},
+  number  = {4},
+  pages   = {234--242},
+  doi     = {10.1038/s43588-022-00231-2},
+  note    = {PMID: 38177542; PMCID: PMC10766522},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/38177542/},
+  eprint  = {https://doi.org/10.1038/s43588-022-00231-2}
+}
+
+@article{IsidroLlobet2019,
+  author  = {Isidro-Llobet, Albert and Kenworthy, Martin N. and Mukherjee, Subha and Kopach, Michael E. and Wegner, Katarzyna and Gallou, Fabrice and Smith, Austin G. and Roschangar, Frank},
+  title   = {Sustainability Challenges in Peptide Synthesis and Purification: From {R\&D} to Production},
+  journal = {The Journal of Organic Chemistry},
+  year    = {2019},
+  volume  = {84},
+  number  = {8},
+  pages   = {4615--4628},
+  doi     = {10.1021/acs.joc.8b03001},
+  note    = {PMID: 30900880},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/30900880/},
+  eprint  = {https://doi.org/10.1021/acs.joc.8b03001}
+}
+
+@article{Gutman2022,
+  author  = {Gutman, A. N. and others},
+  title   = {Predicting the Success of {Fmoc}-Based Peptide Synthesis},
+  journal = {ACS Omega},
+  year    = {2022},
+  volume  = {7},
+  number  = {29},
+  pages   = {25805--25814},
+  doi     = {10.1021/acsomega.2c02057},
+  note    = {PMID: 35847273; PMCID: PMC9280948},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/35847273/},
+  eprint  = {https://doi.org/10.1021/acsomega.2c02057}
+}
+
+@article{Muth2018,
+  author  = {Muth, Thilo and Renard, Bernhard Y.},
+  title   = {Evaluating de novo sequencing in proteomics: already an accurate alternative to database-driven peptide identification?},
+  journal = {Briefings in Bioinformatics},
+  year    = {2018},
+  volume  = {19},
+  number  = {5},
+  pages   = {954--970},
+  doi     = {10.1093/bib/bbx033},
+  URL     = {https://doi.org/10.1093/bib/bbx033},
+  eprint  = {https://doi.org/10.1093/bib/bbx033}
+}
+
+@article{Poston2014,
+  author  = {Poston, Chloe N. and Higgs, Richard E. and You, Jinsam and Gelfanova, Valentina and Hale, John E. and Knierman, Michael D. and Siegel, Robert and Gutierrez, Jesus A.},
+  title   = {A quantitative tool to distinguish isobaric leucine and isoleucine residues for mass spectrometry-based de novo monoclonal antibody sequencing},
+  journal = {Journal of the American Society for Mass Spectrometry},
+  year    = {2014},
+  volume  = {25},
+  number  = {7},
+  pages   = {1228--1236},
+  doi     = {10.1007/s13361-014-0892-1},
+  note    = {PMID: 24845350},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/24845350/},
+  eprint  = {https://doi.org/10.1007/s13361-014-0892-1}
+}
+
+@article{Xiao2016,
+  author  = {Xiao, Yongsheng and Vecchi, Malgorzata M. and Wen, Dingyi},
+  title   = {Distinguishing between Leucine and Isoleucine by Integrated {LC}-{MS} Analysis Using an Orbitrap Fusion Mass Spectrometer},
+  journal = {Analytical Chemistry},
+  year    = {2016},
+  volume  = {88},
+  number  = {21},
+  pages   = {10757--10766},
+  doi     = {10.1021/acs.analchem.6b03409},
+  note    = {PMID: 27704771},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/27704771/},
+  eprint  = {https://doi.org/10.1021/acs.analchem.6b03409}
+}
+
+@article{Rossler2023,
+  author  = {Rössler, Simon L. and Grob, Nathalie M. and Buchwald, Stephen L. and Pentelute, Bradley L.},
+  title   = {Abiotic peptides as carriers of information for the encoding of small-molecule library synthesis},
+  journal = {Science},
+  year    = {2023},
+  volume  = {379},
+  number  = {6635},
+  pages   = {939--945},
+  doi     = {10.1126/science.adf1354},
+  note    = {PMID: 36862767; PMCID: PMC10064805},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/36862767/},
+  eprint  = {https://doi.org/10.1126/science.adf1354}
+}
+
+@article{Luo2025,
+  author  = {Luo, Benxiang and Gao, Songyan and Wu, Minghao and Dong, Xin and Deng, Xiaoyong and Hu, Honggang},
+  title   = {Peptide-encapsulated hydrogels for long-term data preservation},
+  journal = {Communications Materials},
+  year    = {2025},
+  volume  = {6},
+  pages   = {183},
+  doi     = {10.1038/s43246-025-00915-y},
+  URL     = {https://doi.org/10.1038/s43246-025-00915-y},
+  eprint  = {https://doi.org/10.1038/s43246-025-00915-y}
+}
+
+@article{Zhang2025,
+  author  = {Zhang, Anxun and Wang, Longjie and Zhai, Xiaowei and Xiao, Yao and Wu, Yanchan and Zhao, Yongxi and Liu, Kai and Zheng, Ji-Shen and Chen, Dong},
+  title   = {Composite Mapping for Peptide-Based Data Storage with Higher Coding Density and Fewer Synthesis Cycles},
+  journal = {Advanced Science},
+  year    = {2025},
+  volume  = {12},
+  number  = {27},
+  pages   = {e2503790},
+  doi     = {10.1002/advs.202503790},
+  note    = {PMID: 40285644; PMCID: PMC12279161},
+  URL     = {https://pubmed.ncbi.nlm.nih.gov/40285644/},
+  eprint  = {https://doi.org/10.1002/advs.202503790}
+}
+"
+    }
+  ]
+}

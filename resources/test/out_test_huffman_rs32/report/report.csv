@@ -1,0 +1,4 @@
+input_path,status,original_size_bytes,decoded_size_bytes,size_delta_bytes,success,byte_errors,bit_errors,bit_error_rate
+text_files/Chinesisches Gedicht.txt,ok,765,763,-2,False,484,1821,0.29754901960784313
+text_files/Lied des Narren.txt,ok,627,621,-6,False,595,1827,0.3642344497607656
+text_files/pep.txt,ok,1756,1756,0,True,0,0,0.0

@@ -1,0 +1,85 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<!--[if IE 7 ]> <html lang="en" class="ie7"> <![endif]-->
+<!--[if IE 8 ]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9 ]> <html lang="en" class="ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html lang="en"> <!--<![endif]-->
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
+	<link rel="shortcut icon" href="/static/images/favicon.ico">
+	<title>PepSySco Result</title>
+	<!-- css -->
+	<link rel="stylesheet" href="/static/css/reset.css">
+	<link rel="stylesheet" href="/static/css/base.css">
+	<link rel="stylesheet" href="/static/pepsysco/styles.css">
+	<!-- javascript -->
+	<script type="text/javascript" src="/static/js/jquery.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.tablesorter.min.js"></script>
+<script type="text/javascript" src="/static/js/citation.js"></script>
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+		$.tablesorter.defaults.widgets = ['zebra']; 
+		
+		// call the tablesorter plugin 
+		$(".tablesorter").tablesorter();
+		
+	});
+</script>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-S56K1PCVZE"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-S56K1PCVZE');
+</script>
+
+<!-- UA analytics - expiring June 2023 -->
+<script type="text/javascript">
+ 
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-21275858-2']);
+  _gaq.push(['_trackPageview']);
+ 
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+ 
+</script>
+</head>
+<body>
+	<div class="labs-header-wrap">
+		<a href="/"><span>IEDB Analysis Resource - Labs</span></a>
+		<img alt="Logo" src="/static/main/images/logo-flask.png"/>
+        <div class="iedb-nav">
+			<ul>
+
+<li><a href="/pepsysco/" class="home" title="www.iedb.org &raquo; home">Home</a></li><li><a href="/pepsysco/help/" class="help">Help</a></li><li><a href="/pepsysco/example/" class="example">Example</a></li><li><a href="/pepsysco/reference/" class="reference">Reference</a></li><li><a href="/pepsysco/contact/" class="contact">Contact</a></li>
+</ul>
+		</div>
+	</div><!-- end of header-wrap -->
+
+	<div style="clear:both;"></div>
+
+	<div id="content">
+		
+		
+<h2>PepSySco</h2><br><table cellspacing="1" class="tablesorter" id="result_table"><thead><tr><th>Peptide</th><th class="tablesorter-headerAsc">Score</th></tr></thead><tbody><tr><td class="sequence">AHDHFDHD</td><td>1.00000</td></tr></tbody></table><div id="dowload-result-link"><a href="../result_in_csv/">Download result<img src="/static/images/excel-icon.png"/></a></div>
+
+	</div>
+	<hr width="100%">
+
+	<div id="footer">
+		<p style="line-height:1.4;"><small>&copy; 2005-2025 | <a href="https://www.iedb.org/">IEDB Home</a> | <a style="width: 100px;" class="uline" href="https://help.iedb.org">Help</a> | <a style="width: 100px;" class="uline" href="mailto:help@iedb.org">Contact</a><br>
+	Supported by a contract from the <a href="https://www.niaid.nih.gov/">National Institute of Allergy and Infectious Diseases</a>,
+	a component of the National Institutes of Health in the Department of Health and Human Services.</small></p></div>
+
+</body>
+
+</html>
