@@ -2,7 +2,7 @@ dahuffman==0.4.2
 pillow==10.4.0
 reedsolo==1.7.0
 streamlit==1.52.1
-pandas==2.2.2
+pandas==2.3.3
 requests==2.32.3
 latex2mathml==3.77.0
 pymupdf==1.25.1
